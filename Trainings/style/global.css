@@ -32,6 +32,10 @@ body {
     font-size: 22px;
 }
 
+.form-box .form-field.wider {
+    width: 140%;
+}
+
 .form-box .form-buttons {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -54,6 +58,17 @@ body {
 .form-box .form-buttons button:hover {
     background-color: white;
     color: #6D6AFF;
+}
+
+.form-box .form-fields-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: -10px;
+}
+
+.form-box .form-fields-wrapper .form-field {
+    margin: 10px;
 }
 
 .back-button {
