@@ -39,6 +39,16 @@ header {
     cursor: pointer;
 }
 
+.trainings-button.selected {
+    color: #8482FF;
+    background-color: white;
+}
+
+.trainings-button.selected:hover {
+    color: white;
+    background-color: #8482FF;
+}
+
 .trainings-button:hover {
     background-color: white;
     color: #8482FF;
