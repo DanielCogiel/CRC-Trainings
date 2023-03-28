@@ -10,6 +10,7 @@ header {
     justify-content: space-between;
     align-items: center;
     padding: 0 10px;
+    overflow-x: scroll;
 }
 
 header .left-section {
@@ -32,6 +33,7 @@ header .right-section {
 main {
     border: 8px solid #6D6AFF;
     height: 100%;
+    padding-bottom: 10px;
 }
 
 main .content-wrapper {
@@ -52,8 +54,10 @@ main .section-header {
     width: 60%;
 }
 
-.form-box .form-field {
-    width: 100%;
+@media(max-width: 800px) {
+    .form-box {
+        width: 100%;
+    }
 }
 
 .form-box .form-buttons {

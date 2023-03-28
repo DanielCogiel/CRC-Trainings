@@ -8,6 +8,10 @@ body {
     align-items: center;
 }
 
+.form-box .form-field {
+    width: 100%;
+}
+
 .form-box .form-field input {
     display: block;
     width: calc(100% - 20px);
@@ -30,6 +34,7 @@ body {
     color: white;
     font-weight: 800;
     font-size: 22px;
+    white-space: nowrap;
 }
 
 .form-box .form-field.wider {
@@ -72,6 +77,9 @@ body {
 }
 
 .back-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 7px 25px;
     font-family: inherit;
     font-weight: 500;
