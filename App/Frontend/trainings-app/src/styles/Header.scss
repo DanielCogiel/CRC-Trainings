@@ -1,0 +1,23 @@
+#header {
+    background-color: #ffffff;
+    border-bottom: solid 5px #8482FF;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+
+    #header-left {
+        display: flex;
+        align-items: center;
+
+        img {
+            width: 120px;
+            height: 120px;
+        }
+
+        h1 {
+            font-size: 40px;
+        }
+    }
+}
+
