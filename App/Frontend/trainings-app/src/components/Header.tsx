@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import NavButton from '../atoms/NavButton';
 
 import AppLogo from '../resources/images/graduation_school_icon.svg'
 import '../styles/Header.scss'
@@ -26,14 +26,9 @@ class Header extends React.Component<HeaderProps, HeaderState> {
                     <h1>Trainings</h1>
                 </div>
                 <div id="header-right">
-                    { routes.filter(route => route.HeaderRouteName).map(route => {
-                        return  <NavLink to={route.path} children={({isActive}) => 
-                        (
-                            <button className={isActive ? "trainings-button selected" : "trainings-button"} >
-                                {route.HeaderRouteName}
-                            </button>
-                        )} />
-                    }) }    
+                    { routes.filter(route => route.HeaderRouteName).map(
+                        route => <NavButton path={route.path}>{route.HeaderRouteName}</NavButton>
+                    ) }    
                 </div>
             </header>
         );
