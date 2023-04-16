@@ -1,4 +1,5 @@
 import React from 'react';
+import Header from '../components/Header';
 
 interface MainLayoutProps {
     children?: React.ReactNode
@@ -16,7 +17,7 @@ class MainLayout extends React.Component<MainLayoutProps, MainLayoutState> {
     render() { 
         return ( 
             <>
-                <header>This is header of main layout.</header>
+                <Header />
                 {this.props.children}
             </>
          );
