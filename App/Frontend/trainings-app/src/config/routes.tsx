@@ -26,7 +26,8 @@ const routes: RouteModel[] = [
     },
     {
         path: `${COURSES_URL}/register`,
-        component: <CourseRegistrationPage />
+        component: <CourseRegistrationPage />,
+        HeaderRouteName: 'Register new course'
     },
     {
         path: '/login',
