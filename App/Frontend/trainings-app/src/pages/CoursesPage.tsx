@@ -1,7 +1,9 @@
 import React from 'react'
 
 import MainLayout from '../layouts/MainLayout';
+import Course from '../components/Course';
 import CourseModel from '../interfaces/CourseModel';
+import '../styles/CoursesPage.scss'
 
 interface CoursesPageProps {
     
@@ -22,27 +24,31 @@ class CoursesPage extends React.Component<CoursesPageProps, CoursesPageState> {
     }
 
     async getCourses(): Promise<void> {
-        const response = await fetch('http://localhost:4000/api');
-        const data = await response.json();
-        this.setState({
-            courses: data,
-            isLoading: false
-        });
+        try {
+            const response = await fetch('http://localhost:4000/api');
+            const data = await response.json();
+            this.setState({
+                courses: data,
+                isLoading: false
+            });
+            console.log(data)
+        } catch (Exception) {
+            console.error('Could not fetch data.')
+        } 
     }
 
     componentDidMount(): void {
-        console.log(this.state.courses)
         this.getCourses();
     }
 
     render() { 
         return ( 
-        <>
             <MainLayout>
-                <div>Courses page.</div>
-                {this.state.courses.map(elem => {return <p>{elem.language}</p>})}
+                <main id='container'>
+                  {this.state.courses.map(course => <Course key={course.id} course={course} />)}
+                </main>
             </MainLayout>
-        </> );
+        );
     }
 }
  

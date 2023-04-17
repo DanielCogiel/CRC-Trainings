@@ -27,7 +27,7 @@ class Header extends React.Component<HeaderProps, HeaderState> {
                 </div>
                 <div id="header-right">
                     { routes.filter(route => route.HeaderRouteName).map(
-                        route => <NavButton path={route.path}>{route.HeaderRouteName}</NavButton>
+                        (route, idx) => <NavButton key={idx} path={route.path}>{route.HeaderRouteName}</NavButton>
                     ) }    
                 </div>
             </header>

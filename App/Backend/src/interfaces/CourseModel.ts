@@ -1,4 +1,5 @@
 interface CourseModel {
+    id: number,
     title: string,
     language: string,
     date: {

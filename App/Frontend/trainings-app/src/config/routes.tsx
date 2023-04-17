@@ -6,23 +6,25 @@ import LoginPage from "../pages/LoginPage";
 import RegistrationPage from "../pages/RegistrationPage";
 import NotFoundPage from "../pages/NotFoundPage";
 
+const COURSES_URL: string = '/courses'
+
 const routes: RouteModel[] = [
     {
         path: '/',
         component: <Navigate to='/courses/all' />
     },
     {
-        path: '/courses/all',
+        path: `${COURSES_URL}/all`,
         component: <CoursesPage />,
         HeaderRouteName: 'All courses'
     },
     {
-        path: '/courses/personal',
+        path: `${COURSES_URL}/personal`,
         component: <CoursesPage />,
         HeaderRouteName: 'My courses'
     },
     {
-        path: '/courses/register',
+        path: `${COURSES_URL}/register`,
         component: <CourseRegistrationPage />
     },
     {

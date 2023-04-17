@@ -22,7 +22,7 @@ class App extends React.Component<AppProps, AppState> {
     return ( 
     <>
       <Routes>
-        { routes.map((route: RouteModel) => { return <Route path={route.path} element={route.component} /> }) }
+        { routes.map((route: RouteModel, idx: number) => { return <Route key={idx} path={route.path} element={route.component} /> }) }
       </Routes>
     </>
     );

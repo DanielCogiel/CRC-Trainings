@@ -4,6 +4,7 @@ import cors from 'cors';
 
 const courses: CourseModel[] = [
     {
+        id: 1,
         title: "Python course for beginners",
         language: "PL",
         date: {
@@ -20,6 +21,7 @@ const courses: CourseModel[] = [
         trainer: "Jan Kowalski"
     },
     {
+        id: 2,
         title: "Python course for beginners",
         language: "PL",
         date: {
@@ -36,6 +38,7 @@ const courses: CourseModel[] = [
         trainer: "Jan Kowalski"
     },
     {
+        id: 3,
         title: "Python course for beginners",
         language: "PL",
         date: {
@@ -52,6 +55,7 @@ const courses: CourseModel[] = [
         trainer: "Jan Kowalski"
     },
     {
+        id: 4,
         title: "Python course for beginners",
         language: "PL",
         date: {
