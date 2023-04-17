@@ -3,6 +3,7 @@ import React from 'react'
 import MainLayout from '../layouts/MainLayout';
 import Course from '../components/Course';
 import CourseModel from '../interfaces/CourseModel';
+import Preloader from '../components/Preloader';
 import '../styles/CoursesPage.scss'
 
 interface CoursesPageProps {
@@ -15,6 +16,8 @@ interface CoursesPageState {
 }
  
 class CoursesPage extends React.Component<CoursesPageProps, CoursesPageState> {
+    API_URL: string = 'http://localhost:4000/api/courses/all'
+
     constructor(props: CoursesPageProps) {
         super(props);
         this.state = {
@@ -25,7 +28,7 @@ class CoursesPage extends React.Component<CoursesPageProps, CoursesPageState> {
 
     async getCourses(): Promise<void> {
         try {
-            const response = await fetch('http://localhost:4000/api/courses/all');
+            const response = await fetch(this.API_URL);
             const data = await response.json();
             this.setState({
                 courses: data,
@@ -43,10 +46,12 @@ class CoursesPage extends React.Component<CoursesPageProps, CoursesPageState> {
 
     render() { 
         return ( 
-            <MainLayout>
-                <main id='container'>
-                  {this.state.courses.map(course => <Course key={course.id} course={course} />)}
-                </main>
+            <MainLayout> 
+                { this.state.isLoading ? <Preloader /> :
+                    <main id='container'>
+                        {this.state.courses.map(course => <Course key={course.id} course={course} />)}
+                    </main>
+                }
             </MainLayout>
         );
     }
