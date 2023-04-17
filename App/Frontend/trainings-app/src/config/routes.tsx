@@ -5,6 +5,7 @@ import CourseRegistrationPage from "../pages/CourseRegistrationPage";
 import LoginPage from "../pages/LoginPage";
 import RegistrationPage from "../pages/RegistrationPage";
 import NotFoundPage from "../pages/NotFoundPage";
+import PersonalCoursesPage from "../pages/PersonalCoursesPage";
 
 const COURSES_URL: string = '/courses'
 
@@ -20,7 +21,7 @@ const routes: RouteModel[] = [
     },
     {
         path: `${COURSES_URL}/personal`,
-        component: <CoursesPage />,
+        component: <PersonalCoursesPage />,
         HeaderRouteName: 'My courses'
     },
     {

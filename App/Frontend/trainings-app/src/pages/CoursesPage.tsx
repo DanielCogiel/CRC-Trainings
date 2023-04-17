@@ -25,14 +25,14 @@ class CoursesPage extends React.Component<CoursesPageProps, CoursesPageState> {
 
     async getCourses(): Promise<void> {
         try {
-            const response = await fetch('http://localhost:4000/api');
+            const response = await fetch('http://localhost:4000/api/courses/all');
             const data = await response.json();
             this.setState({
                 courses: data,
                 isLoading: false
             });
             console.log(data)
-        } catch (Exception) {
+        } catch (error) {
             console.error('Could not fetch data.')
         } 
     }
