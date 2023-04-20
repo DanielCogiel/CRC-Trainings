@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button, Form, InputGroup, Row, Col } from 'react-bootstrap';
 import { Navigate } from 'react-router-dom';
+import { toast } from 'react-toastify'
 
 import MainLayout from '../layouts/MainLayout';
 import CourseModel from '../interfaces/CourseModel';
@@ -124,6 +125,7 @@ class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps
                 }
             });
             const message = await response.json();
+            toast.info(message);
             this.setState({
                 ...this.state,
                 redirect: true

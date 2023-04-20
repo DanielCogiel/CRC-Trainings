@@ -41,7 +41,7 @@ class CoursesPage extends React.Component<CoursesPageProps, CoursesPageState> {
     }
 
     componentDidMount(): void {
-        this.getCourses();
+        this.getCourses();    
     }
 
     render() { 
