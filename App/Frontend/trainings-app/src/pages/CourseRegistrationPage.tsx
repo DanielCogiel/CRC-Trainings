@@ -1,22 +1,46 @@
 import React from 'react';
+import { Button, Form, InputGroup, Row, Col } from 'react-bootstrap';
+import { Navigate } from 'react-router-dom';
 
 import MainLayout from '../layouts/MainLayout';
+import CourseModel from '../interfaces/CourseModel';
+import { API_URLS } from '../config/api';
+import { Level, Language } from '../config/enums';
 import '../styles/CourseRegistrationPage.scss'
-import { Form, InputGroup } from 'react-bootstrap';
 
 
 interface CourseRegistrationPageProps {
     
 }
  
-interface CourseRegistrationPageState {
-    
+interface CourseRegistrationPageState extends CourseModel {
+    isRemote: boolean,
+    redirect: boolean
 }
  
 class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps, CourseRegistrationPageState> {
+    ENDPOINT: string = API_URLS.COURSES.REGISTER;
+
     constructor(props: CourseRegistrationPageProps) {
         super(props);
-        this.state = {};
+        this.state = {
+            title: '',
+            language: 'PL',
+            date: {
+                start: '',
+                finish: ''
+            },
+            hours: {
+                start: '',
+                finish: '',
+                times: 0
+            },
+            level: 'Basic',
+            location: '',
+            trainer: '',
+            isRemote: false,
+            redirect: false
+        };
     }
 
     componentDidMount(): void {
@@ -27,147 +51,168 @@ class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps
         document.body.classList.remove('body-purple');
     }
 
+    handleChanges = (event: any) => {
+        this.setState({
+            ...this.state,
+            [event.target.id]: event.target.value
+        });
+    }
+
+    handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        this.setState({
+            ...this.state,
+            date: {
+                ...this.state.date,
+                [event.target.id]: event.target.value 
+            }
+        });
+    } 
+
+    handleTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        this.setState({
+            ...this.state,
+            hours: {
+                ...this.state.hours,
+                [event.target.id]: event.target.value 
+            }
+        });
+    } 
+
+    checkRemote = () => {
+        this.setState({
+          ...this.state,
+            isRemote: !this.state.isRemote,
+            location: !this.state.isRemote ? 'Remote' : ''
+        })
+    }
+
+    submitForm = (event: any) => {
+        event.preventDefault();
+        this.postCourse();
+    }
+
+    async postCourse(): Promise<void> {
+        const data: CourseModel = {
+            title: this.state.title,
+            language: this.state.language.toLowerCase(),
+            date: {
+                start: this.state.date.start,
+                finish: this.state.date.finish
+            },
+            hours: {
+                start: this.state.hours.start,
+                finish: this.state.hours.finish,
+                times: this.state.hours.times
+            },
+            level: this.state.level.toLowerCase(),
+            location: this.state.location,
+            trainer: this.state.trainer
+        }
+
+        try {
+            const response = await fetch(this.ENDPOINT, {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const message = await response.json();
+            this.setState({
+                ...this.state,
+                redirect: true
+            })
+        } catch (error) {}
+    }
+
     render() { 
         return ( 
-            <>
                 <MainLayout>
                 <h1 className="section-header">Register new course</h1>
                 <div className="container">
                     <div className="row justify-content-center">
                         <div className="col-10">
-                        <Form>
+                        <Form style={{border: 'none'}} onSubmit={this.submitForm}>
                             <Form.Group>
                                 <Form.Label >Course title</Form.Label>
-                                <Form.Control size='lg' id="courseTitle" type='text' placeholder="Course title" />
+                                <Form.Control size='lg' id="title" value={this.state.title} type='text'
+                                onChange={this.handleChanges} placeholder="Course title" />
                             </Form.Group>
                             
-                            <InputGroup>
-                                <Form.Group>
+                            <Row>
+                                <Form.Group as={Col}>
                                     <Form.Label >First day</Form.Label>
-                                    <Form.Control size='lg' id="courseFirstDay" type='date' />
+                                    <Form.Control size='lg' id="start" value={this.state.date.start} 
+                                    onChange={this.handleDateChange} type='date' />
                                 </Form.Group> 
-                                <Form.Group>
-                                    <Form.Label >Last day</Form.Label>
-                                    <Form.Control size='lg' id="courseLastDay" type='date' />
+
+                                <Form.Group as={Col}>
+                                    <Form.Label>Last day</Form.Label>
+                                    <Form.Control size='lg' id="finish" value={this.state.date.finish}
+                                    onChange={this.handleDateChange} type='date' />
                                 </Form.Group>
-                                <Form.Group>
+
+                                <Form.Group as={Col}>
                                     <Form.Label >Beginning hour</Form.Label>
-                                    <Form.Control size='lg' id="courseBeginningHour" type='time' />
+                                    <Form.Control size='lg' id="start" value={this.state.hours.start}
+                                    onChange={this.handleTimeChange} type='time' />
                                 </Form.Group>
-                                <Form.Group>
+
+                                <Form.Group as={Col}>
                                     <Form.Label >Finishing hour</Form.Label>
-                                    <Form.Control size='lg' id="courseFinishingHour" type='time' />
+                                    <Form.Control size='lg' id="finish" value={this.state.hours.finish}
+                                    onChange={this.handleTimeChange} type='time' />
                                 </Form.Group>
-                                <Form.Group>
+
+                                <Form.Group as={Col}>
                                     <Form.Label >Number of lessons</Form.Label>
-                                    <Form.Control size='lg' id="courseNumberOfDays" type='number' placeholder="Number of lessons" />
+                                    <Form.Control size='lg' id="times" value={this.state.hours.times}
+                                    onChange={this.handleTimeChange} type='number' placeholder="Number of lessons" />
                                 </Form.Group>
-                            </InputGroup>
+                            </Row>
                             
-                            <InputGroup>
-                                <Form.Group>
+                            <Row>
+                                <Form.Group as={Col}>
                                     <Form.Label >Language</Form.Label>
-                                    <Form.Select size="lg">
-                                        <option>EN</option>
-                                        <option>PL</option>
+                                    <Form.Select id='language' value={this.state.language}
+                                    onChange={this.handleChanges} size="lg">
+                                        { Object.values(Language).map(lang => {return <option key={lang}>{lang}</option>}) }
                                     </Form.Select>
                                 </Form.Group>
-                                <Form.Group>
+
+                                <Form.Group as={Col}>
                                     <Form.Label >Level</Form.Label>
-                                    <Form.Select size="lg">
-                                        <option>Basic</option>  
-                                        <option>Intermediate</option>  
-                                        <option>Expert</option>  
+                                    <Form.Select id='level' value={this.state.level}
+                                    onChange={this.handleChanges} size="lg">
+                                        { Object.values(Level).map(level => {return <option key={level}>{level}</option>}) } 
                                     </Form.Select>
                                 </Form.Group>
-                                <Form.Group>
-                                    <Form.Label >Location</Form.Label>
-                                    <Form.Control size='lg' id="courseLocation" type='text' placeholder="Course location" />
+
+                                <Form.Group as={Col}>
+                                    <Form.Label >Location (check if remote)</Form.Label>
+                                    <InputGroup>
+                                        <Form.Control disabled={this.state.isRemote} value={this.state.location}
+                                        onChange={this.handleChanges} size='lg' id="location" type='text' placeholder="Course location" />
+                                        <InputGroup.Checkbox checked={this.state.isRemote} onChange={this.checkRemote} />
+                                    </InputGroup>
                                 </Form.Group>
+                                
                                 <Form.Group>
                                     <Form.Label >Trainer's name</Form.Label>
-                                    <Form.Control size='lg' id="courseTrainer" type='text' placeholder="Course title" />
+                                    <Form.Control size='lg' id="trainer" value={this.state.trainer}
+                                    onChange={this.handleChanges} type='text' placeholder="Trainer's name" />
                                 </Form.Group>
-                            </InputGroup>
-
+                            </Row>
                             
-                        
+                            <Button variant='primary' size='lg' type='submit'>Register new course</Button>
                         </Form>
+                        {
+                            this.state.redirect && <Navigate to='/courses/all' />
+                        }
                         </div>
                     </div>
                 </div>
-
-                {/* <form>
-                    <h1 className="section-header">Register new course</h1>
-                    <div className="content-wrapper"> 
-                        <div className="form-box">
-                            <div className="form-field">
-                                <p>Course name</p>
-                                <input/>
-                            </div>
-
-                            <div className="form-fields-wrapper wider">
-                                <div className="form-field wider">
-                                    <p>First day</p>
-                                    <input type="date" />
-                                </div>
-                                <div className="form-field wider">
-                                    <p>Last day</p>
-                                    <input type="date" />
-                                </div>
-                            </div>
-
-                            <div className="form-fields-wrapper">
-                                <div className="form-field">
-                                    <p>Beginning hour</p>
-                                    <input type='time' />
-                                </div>
-                                <div className="form-field">
-                                    <p>Finishing hour</p>
-                                    <input type='time' />
-                                </div>
-                            </div>
-
-                            <div className="form-fields-wrapper">
-                                <div className="form-field">
-                                    <p>Language</p>
-                                    <select>
-                                        <option>PL</option>
-                                        <option>EN</option>
-                                    </select>
-                                </div>
-                                <div className="form-field">
-                                    <p>Level</p>
-                                    <select>
-                                        <option>Basic</option>
-                                        <option>Intermediate</option>
-                                        <option>Expert</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className="form-fields-wrapper">
-                                <div className="form-field">
-                                    <p>Location</p>
-                                    <input/>
-                                </div>
-                                <div className="form-field">
-                                    <p>Remote</p>
-                                    <input type='radio' />
-                                </div>
-                                <div className="form-field">
-                                    <p>Trainer's name</p>
-                                    <input/>
-                                </div>
-                            </div>
-                            <div className="form-buttons">
-                                <button>Register new course</button>
-                            </div>
-                        </div>
-                    </div>
-                </form> */}
                 </MainLayout>
-            </>
          );
     }
 }
