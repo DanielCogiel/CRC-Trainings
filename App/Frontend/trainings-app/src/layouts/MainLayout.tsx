@@ -2,7 +2,8 @@ import React from 'react';
 import Header from '../components/Header';
 
 interface MainLayoutProps {
-    children?: React.ReactNode
+    children?: React.ReactNode,
+    isAlternative?: boolean
 }
  
 interface MainLayoutState {
@@ -17,7 +18,7 @@ class MainLayout extends React.Component<MainLayoutProps, MainLayoutState> {
     render() { 
         return ( 
             <>
-                <Header />
+                <Header isAlternative={this.props.isAlternative} />
                 {this.props.children}
             </>
          );

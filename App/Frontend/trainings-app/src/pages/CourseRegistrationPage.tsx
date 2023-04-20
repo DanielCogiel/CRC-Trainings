@@ -15,7 +15,8 @@ interface CourseRegistrationPageProps {
  
 interface CourseRegistrationPageState extends CourseModel {
     isRemote: boolean,
-    redirect: boolean
+    redirect: boolean,
+    validated: boolean
 }
  
 class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps, CourseRegistrationPageState> {
@@ -33,13 +34,14 @@ class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps
             hours: {
                 start: '',
                 finish: '',
-                times: 0
+                times: 1
             },
             level: 'Basic',
             location: '',
             trainer: '',
             isRemote: false,
-            redirect: false
+            redirect: false,
+            validated: false
         };
     }
 
@@ -88,7 +90,11 @@ class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps
 
     submitForm = (event: any) => {
         event.preventDefault();
-        this.postCourse();
+
+        const form = event.currentTarget;
+        if (form.checkValidity()) {
+            this.postCourse();
+        }
     }
 
     async postCourse(): Promise<void> {
@@ -127,47 +133,48 @@ class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps
 
     render() { 
         return ( 
-                <MainLayout>
+                <MainLayout isAlternative>
                 <h1 className="section-header">Register new course</h1>
                 <div className="container">
                     <div className="row justify-content-center">
                         <div className="col-10">
-                        <Form style={{border: 'none'}} onSubmit={this.submitForm}>
+                        <Form validated={this.state.validated} style={{border: 'none', color: 'white'}} onSubmit={this.submitForm}>
                             <Form.Group>
-                                <Form.Label >Course title</Form.Label>
-                                <Form.Control size='lg' id="title" value={this.state.title} type='text'
+                                <Form.Label>Course title</Form.Label>
+                                <Form.Control required minLength={10} maxLength={100} size='lg' id="title" value={this.state.title} type='text'
                                 onChange={this.handleChanges} placeholder="Course title" />
+                                <Form.Control.Feedback>Very well.</Form.Control.Feedback>
                             </Form.Group>
                             
                             <Row>
                                 <Form.Group as={Col}>
                                     <Form.Label >First day</Form.Label>
-                                    <Form.Control size='lg' id="start" value={this.state.date.start} 
+                                    <Form.Control required size='lg' id="start" value={this.state.date.start} 
                                     onChange={this.handleDateChange} type='date' />
                                 </Form.Group> 
 
                                 <Form.Group as={Col}>
                                     <Form.Label>Last day</Form.Label>
-                                    <Form.Control size='lg' id="finish" value={this.state.date.finish}
+                                    <Form.Control min={this.state.date.start} required size='lg' id="finish" value={this.state.date.finish}
                                     onChange={this.handleDateChange} type='date' />
                                 </Form.Group>
 
                                 <Form.Group as={Col}>
                                     <Form.Label >Beginning hour</Form.Label>
-                                    <Form.Control size='lg' id="start" value={this.state.hours.start}
+                                    <Form.Control required size='lg' id="start" value={this.state.hours.start}
                                     onChange={this.handleTimeChange} type='time' />
                                 </Form.Group>
 
                                 <Form.Group as={Col}>
                                     <Form.Label >Finishing hour</Form.Label>
-                                    <Form.Control size='lg' id="finish" value={this.state.hours.finish}
+                                    <Form.Control required min={this.state.hours.start} size='lg' id="finish" value={this.state.hours.finish}
                                     onChange={this.handleTimeChange} type='time' />
                                 </Form.Group>
 
                                 <Form.Group as={Col}>
                                     <Form.Label >Number of lessons</Form.Label>
-                                    <Form.Control size='lg' id="times" value={this.state.hours.times}
-                                    onChange={this.handleTimeChange} type='number' placeholder="Number of lessons" />
+                                    <Form.Control required size='lg' id="times" value={this.state.hours.times}
+                                    onChange={this.handleTimeChange} type='number' min='1' placeholder="Number of lessons" />
                                 </Form.Group>
                             </Row>
                             
@@ -191,7 +198,7 @@ class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps
                                 <Form.Group as={Col}>
                                     <Form.Label >Location (check if remote)</Form.Label>
                                     <InputGroup>
-                                        <Form.Control disabled={this.state.isRemote} value={this.state.location}
+                                        <Form.Control required disabled={this.state.isRemote} value={this.state.location}
                                         onChange={this.handleChanges} size='lg' id="location" type='text' placeholder="Course location" />
                                         <InputGroup.Checkbox checked={this.state.isRemote} onChange={this.checkRemote} />
                                     </InputGroup>
@@ -199,12 +206,12 @@ class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps
                                 
                                 <Form.Group>
                                     <Form.Label >Trainer's name</Form.Label>
-                                    <Form.Control size='lg' id="trainer" value={this.state.trainer}
+                                    <Form.Control required max='50' size='lg' id="trainer" value={this.state.trainer}
                                     onChange={this.handleChanges} type='text' placeholder="Trainer's name" />
+                                    <Button variant='primary' style={{marginTop: '10px'}} size='lg' type='submit'>Register new course</Button>  
                                 </Form.Group>
                             </Row>
-                            
-                            <Button variant='primary' size='lg' type='submit'>Register new course</Button>
+
                         </Form>
                         {
                             this.state.redirect && <Navigate to='/courses/all' />

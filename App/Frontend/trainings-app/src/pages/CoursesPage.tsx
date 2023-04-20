@@ -35,7 +35,6 @@ class CoursesPage extends React.Component<CoursesPageProps, CoursesPageState> {
                 courses: data,
                 isLoading: false
             });
-            console.log(data)
         } catch (error) {
             console.error('Could not fetch data.')
         } 
