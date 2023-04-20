@@ -3,7 +3,8 @@ import { NavLink } from 'react-router-dom';
 
 interface NavButtonProps {
     path: string,
-    children?: React.ReactNode
+    children?: React.ReactNode,
+    isAlternative?: boolean
 }
  
 interface NavButtonState {
@@ -19,7 +20,7 @@ class NavButton extends React.Component<NavButtonProps, NavButtonState> {
         return (
             <NavLink to={this.props.path} children={({isActive}) => 
                 (
-                    <button className={isActive ? "trainings-button selected" : "trainings-button"} >
+                    <button className={`trainings-button ${isActive ? 'selected' : ''} ${this.props.isAlternative ? 'alternative' : ''}`} >
                         {this.props.children}
                     </button>
                 )} />

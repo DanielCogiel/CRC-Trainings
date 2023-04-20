@@ -1,5 +1,7 @@
+import { Level, Language } from "../config/enums"
+
 interface CourseModel {
-    id: number,
+    id?: number,
     title: string,
     language: string,
     date: {

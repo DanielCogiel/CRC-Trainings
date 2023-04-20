@@ -35,6 +35,28 @@ code {
   padding: 5px 7px;
   }
 
+  &.alternative {
+    color: #6D6AFF;
+    background-color: white;
+    border-color: white;
+
+    &.selected {
+      color: white;
+      background-color: #6D6AFF;
+
+      &:hover {
+        color: #6D6AFF;
+        background-color: white;
+        border-color: white;
+      }
+    }
+
+    &:hover {
+      color:white;
+      background-color: #6D6AFF;
+    }
+  }
+
   &.selected {
     color: #8482FF;
     background-color: white;

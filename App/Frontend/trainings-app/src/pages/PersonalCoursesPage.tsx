@@ -1,7 +1,8 @@
 import CoursesPage from './CoursesPage';
+import { API_URLS } from '../config/api';
  
 class PersonalCoursesPage extends CoursesPage {
-    API_URL: string = 'http://localhost:4000/api/courses/personal'
+    ENDPOINT: string = API_URLS.COURSES.PERSONAL;
 }
  
 export default PersonalCoursesPage;

@@ -116,7 +116,7 @@ const personalCourses: CourseModel[] = [
 const app: Express = express();
 const PORT: number = 4000;
 
-app.use(cors());
+app.use(express.json(), cors());
 
 app.get(`${API_URL}${COURSES_URL}/all`, (req: Request, res: Response) => {
     res.json(courses);
@@ -124,6 +124,17 @@ app.get(`${API_URL}${COURSES_URL}/all`, (req: Request, res: Response) => {
 
 app.get(`${API_URL}${COURSES_URL}/personal`, (req: Request, res: Response) => {
     res.json(personalCourses);
+})
+
+const mockTable: any[] = []
+app.get(`${API_URL}${COURSES_URL}/mock`, (req: Request, res: Response) => {
+    res.json(mockTable);
+})
+
+app.post(`${API_URL}${COURSES_URL}/register`, (req: Request, res: Response) => {
+    mockTable.push(req.body)
+    console.log(req.body)
+    res.json('Added succesfully.')
 })
 
 app.listen(PORT, () => {

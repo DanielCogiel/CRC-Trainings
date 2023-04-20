@@ -4,6 +4,7 @@ import MainLayout from '../layouts/MainLayout';
 import Course from '../components/Course';
 import CourseModel from '../interfaces/CourseModel';
 import Preloader from '../components/Preloader';
+import { API_URLS } from '../config/api';
 import '../styles/CoursesPage.scss'
 
 interface CoursesPageProps {
@@ -16,7 +17,7 @@ interface CoursesPageState {
 }
  
 class CoursesPage extends React.Component<CoursesPageProps, CoursesPageState> {
-    API_URL: string = 'http://localhost:4000/api/courses/all'
+    ENDPOINT: string = API_URLS.COURSES.ALL;
 
     constructor(props: CoursesPageProps) {
         super(props);
@@ -28,13 +29,12 @@ class CoursesPage extends React.Component<CoursesPageProps, CoursesPageState> {
 
     async getCourses(): Promise<void> {
         try {
-            const response = await fetch(this.API_URL);
+            const response = await fetch(this.ENDPOINT);
             const data = await response.json();
             this.setState({
                 courses: data,
                 isLoading: false
             });
-            console.log(data)
         } catch (error) {
             console.error('Could not fetch data.')
         } 

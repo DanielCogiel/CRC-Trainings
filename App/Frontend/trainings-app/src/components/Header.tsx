@@ -6,7 +6,7 @@ import '../styles/Header.scss'
 import routes from '../config/routes';
 
 interface HeaderProps {
-
+    isAlternative?: boolean
 }
  
 interface HeaderState {
@@ -16,18 +16,18 @@ interface HeaderState {
 class Header extends React.Component<HeaderProps, HeaderState> {
     constructor(props: HeaderProps) {
         super(props);
-        this.state = { };
+        this.state = {};
     }
     render() { 
         return ( 
-            <header id="header">
+            <header id="header" className={this.props.isAlternative ? 'alternative' : ''}>
                 <div id="header-left">
                     <img src={AppLogo} alt="Trainings logo" title="Trainings" />
                     <h1>Trainings</h1>
                 </div>
                 <div id="header-right">
                     { routes.filter(route => route.HeaderRouteName).map(
-                        (route, idx) => <NavButton key={idx} path={route.path}>{route.HeaderRouteName}</NavButton>
+                        (route, idx) => <NavButton isAlternative={this.props.isAlternative} key={idx} path={route.path}>{route.HeaderRouteName}</NavButton>
                     ) }    
                 </div>
             </header>
