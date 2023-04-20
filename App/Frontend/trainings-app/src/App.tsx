@@ -1,5 +1,7 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css';
 
 import RouteModel from './interfaces/RouteModel';
 import routes from './config/routes';
@@ -24,6 +26,16 @@ class App extends React.Component<AppProps, AppState> {
       <Routes>
         { routes.map((route: RouteModel, idx: number) => { return <Route key={idx} path={route.path} element={route.component} /> }) }
       </Routes>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        rtl={false}
+        pauseOnFocusLoss
+        pauseOnHover
+        style={{top: '120px', fontSize: '20px' }}
+      />
     </>
     );
   }
