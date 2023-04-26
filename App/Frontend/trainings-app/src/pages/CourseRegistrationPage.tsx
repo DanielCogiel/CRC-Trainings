@@ -130,7 +130,7 @@ class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps
                 ...this.state,
                 redirect: true
             })
-        } catch (error) {}
+        } catch (error: any) {}
     }
 
     render() { 
