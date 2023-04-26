@@ -137,6 +137,10 @@ app.post(`${API_URL}${COURSES_URL}/register`, (req: Request, res: Response) => {
     res.json('Added succesfully.')
 })
 
+app.post(`${API_URL}/register`, (req: Request, res: Response) => {
+    res.json(req.body);
+})
+
 app.listen(PORT, () => {
     console.log(`Running on port ${PORT}...`)
 })
