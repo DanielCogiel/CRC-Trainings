@@ -2,6 +2,8 @@ import React from 'react';
 import { Form, Button, Row } from 'react-bootstrap';
 import { Navigate } from 'react-router-dom';
 import '../styles/LoginPage.scss'
+import { API_URLS } from '../config/api';
+import { toast } from 'react-toastify';
 
 interface LoginPageProps {
     
@@ -10,16 +12,20 @@ interface LoginPageProps {
 interface LoginPageState {
     username: string, 
     password: string,
-    redirectToRegistration: boolean;
+    redirectToRegistration: boolean,
+    redirectToHome: boolean
 }
  
 class LoginPage extends React.Component<LoginPageProps, LoginPageState> {
+    ENDPOINT = API_URLS.AUTH.LOGIN
+
     constructor(props: LoginPageProps) {
         super(props);
         this.state = {
             username: '',
             password: '',
-            redirectToRegistration: false
+            redirectToRegistration: false,
+            redirectToHome: false
         };
     }
 
@@ -33,6 +39,34 @@ class LoginPage extends React.Component<LoginPageProps, LoginPageState> {
 
     handleSubmit = (event: any) => {
         event.preventDefault();
+        this.logIn();
+    }
+
+    async logIn(): Promise<void> {
+        const data = {
+            username: this.state.username,
+            password: this.state.password
+        }
+
+        fetch(this.ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(parameters => {
+            toast.info(parameters.message);
+            if (parameters.isAuthenticated) {
+                sessionStorage.setItem('username', data.username);
+                sessionStorage.setItem('role', parameters.role.toLowerCase());
+                this.setState({
+                    ...this.state,
+                    redirectToHome: true
+                })
+            }
+        })
     }
 
     handleChange = (event: any) => {
@@ -82,9 +116,8 @@ class LoginPage extends React.Component<LoginPageProps, LoginPageState> {
                                 <Button onClick={this.navigateToRegistration}>Register</Button>
                             </Row>
                         </Form>
-                        {
-                            this.state.redirectToRegistration && <Navigate to='/register' />
-                        }
+                        { this.state.redirectToRegistration && <Navigate to='/register' /> }
+                        { this.state.redirectToHome && <Navigate to='/' /> }
                     </div>
                 </div>
             </div>
