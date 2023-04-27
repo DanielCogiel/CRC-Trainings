@@ -5,6 +5,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.body-with-image {
+  background-image: url('./resources/images/background.jpg');
+  background-size: cover;
+  margin: 0;
+  height: 100%;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;

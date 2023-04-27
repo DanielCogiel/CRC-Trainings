@@ -4,6 +4,9 @@ package-lock.json
 *.log
 *.gz
 
+.vscode
+TRAININGS DATABASE.session.sql
+
 # Coveralls
 .nyc_output
 coverage
