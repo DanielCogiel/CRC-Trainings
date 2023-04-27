@@ -6,6 +6,7 @@ import LoginPage from "../pages/LoginPage";
 import RegistrationPage from "../pages/RegistrationPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import PersonalCoursesPage from "../pages/PersonalCoursesPage";
+import AuthWrapper from "../layouts/AuthWrapper";
 
 const COURSES_URL: string = '/courses'
 
@@ -16,17 +17,17 @@ const routes: RouteModel[] = [
     },
     {
         path: `${COURSES_URL}/all`,
-        component: <CoursesPage />,
+        component: <AuthWrapper><CoursesPage /></AuthWrapper>,
         HeaderRouteName: 'All courses'
     },
     {
         path: `${COURSES_URL}/personal`,
-        component: <PersonalCoursesPage />,
+        component: <AuthWrapper><PersonalCoursesPage /></AuthWrapper>,
         HeaderRouteName: 'My courses'
     },
     {
         path: `${COURSES_URL}/register`,
-        component: <CourseRegistrationPage />,
+        component: <AuthWrapper><CourseRegistrationPage /></AuthWrapper>,
         HeaderRouteName: 'Register new course'
     },
     {
