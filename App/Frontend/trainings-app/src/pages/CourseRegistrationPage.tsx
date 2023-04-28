@@ -37,7 +37,7 @@ class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps
                 finish: '',
                 times: 1
             },
-            level: 'Basic',
+            level: 'Beginner',
             location: '',
             trainer: '',
             isRemote: false,
@@ -100,6 +100,7 @@ class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps
 
     async postCourse(): Promise<void> {
         const data: CourseModel = {
+            username: sessionStorage.getItem('username'),
             title: this.state.title,
             language: this.state.language.toLowerCase(),
             date: {
@@ -124,7 +125,7 @@ class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps
                     'Content-Type': 'application/json'
                 }
             });
-            const message = await response.json();
+            const message = await response.text();
             toast.info(message);
             this.setState({
                 ...this.state,

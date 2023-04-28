@@ -1,6 +1,7 @@
 import express, {Express, Request, Response} from 'express'
 import mysql from 'mysql';
 import CourseModel from './interfaces/CourseModel';
+import mapLanguage from './utility/mappers';
 import cors from 'cors';
 
 const connection = mysql.createConnection({
@@ -144,12 +145,39 @@ app.get(`${API_URL}${COURSES_URL}/personal`, (req: Request, res: Response) => {
 })
 
 app.post(`${API_URL}${COURSES_URL}/register`, (req: Request, res: Response) => {
-    const {title, language, date, hours, level, location, trainer} = req.body
-    const {dateStart, dateFinish} = date;
-    const {hoursStart, hoursFinish, hoursTimes} = hours;
+    const {username, title, language, date, hours, level, location, trainer} = req.body
+    const dateStart = date.start;
+    const dateFinish = date.finish;
+    const hoursStart = hours.start;
+    const hoursFinish = hours.finish;
+    const hoursTimes = hours.times;
 
-    console.log(req.body)
-    res.json('Added succesfully.')
+    connection.query('SELECT * FROM Users WHERE username = ?', [username], (error, result) => {
+        if (error) {
+            res.status(500).send('SQL Error: ' + error.stack);
+        } else {
+            if (result.length > 0) {
+                const owner_id = result[0].id;
+
+                connection.query('INSERT INTO Courses(owner_id, title, language, dateStart, dateFinish, hoursStart, hoursFinish, hoursTimes, level, location, trainer) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [owner_id, title, mapLanguage(language), dateStart, dateFinish,
+                     hoursStart, hoursFinish, hoursTimes, level.toUpperCase(), location, trainer], 
+                     (error: mysql.MysqlError | null, result: mysql.OkPacket) => {
+                        if (error) {
+                            res.status(500).send('SQL Error: ' + error.stack)
+                        } else {
+                            if (result.affectedRows != 0) {
+                                res.send('Added course successfully.')
+                            } else {
+                                res.status(500).send('Could not add given course.')
+                            }
+                        }
+                     });
+            } else {
+                res.status(500).send('No such user in the database.');
+            }
+        }
+    })
 })
 
 app.post(`${API_URL}/register`, (req: Request, res: Response) => {
