@@ -1,7 +1,10 @@
 import React from 'react';
-import { Form, Button, Row, Col } from 'react-bootstrap';
+import { Form, Button, Row, Col, InputGroup } from 'react-bootstrap';
 import { Navigate } from 'react-router-dom';
 import '../styles/LoginPage.scss'
+import UserModel from '../interfaces/UserModel';
+import { API_URLS } from '../config/api';
+import { toast } from 'react-toastify';
 
 interface RegistrationPageProps {
     
@@ -14,10 +17,13 @@ interface RegistrationPageState {
     email: string,
     password: string,
     confirmedPassword: string,
-    redirectToLogin: boolean
+    redirectToLogin: boolean,
+    isCreator: boolean
 }
  
 class RegistrationPage extends React.Component<RegistrationPageProps, RegistrationPageState> {
+    ENDPOINT = API_URLS.AUTH.REGISTER;
+
     constructor(props: RegistrationPageProps) {
         super(props);
         this.state = {
@@ -27,7 +33,8 @@ class RegistrationPage extends React.Component<RegistrationPageProps, Registrati
             email: '',
             password: '',
             confirmedPassword: '',
-            redirectToLogin: false
+            redirectToLogin: false,
+            isCreator: false
         };
     }
 
@@ -41,6 +48,55 @@ class RegistrationPage extends React.Component<RegistrationPageProps, Registrati
 
     handleSubmit = (event: any) => {
         event.preventDefault();
+        this.postUser();
+    }
+
+    async postUser(): Promise<void> {
+        const data: UserModel = {
+            username: this.state.username,
+            password: this.state.password,
+            name: this.state.firstName,
+            surname: this.state.lastName,
+            email: this.state.email,
+            isCreator: this.state.isCreator
+        }
+
+        let redirect: boolean = false;
+       
+        fetch(this.ENDPOINT, {
+            method: 'POST', 
+            body: JSON.stringify(data),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.status === 200)
+                redirect = true;
+            return response.text();
+        })
+        .then(message => toast.info(message))
+        .then(() => {
+            if (redirect) {
+                this.setState({
+                    ...this.state,
+                    redirectToLogin: true
+                })
+            }
+        })
+        
+
+
+        // if (response.status === 200) {
+        //     console.log("fsuhaiudahsdiu")
+        //     response.json().then(() => {
+        //         this.setState({
+        //         ...this.state,
+        //         redirectToLogin: true
+        //         });
+        //     });
+        //     }
+        
     }
 
     handleChange = (event: any) => {
@@ -48,6 +104,13 @@ class RegistrationPage extends React.Component<RegistrationPageProps, Registrati
             ...this.state,
             [event.target.id]: event.target.value
         });
+    }
+
+    checkCreator = (event: any) => {
+        this.setState({
+            ...this.state, 
+            isCreator: !this.state.isCreator
+        })
     }
 
     navigateToLogin = () => {
@@ -65,15 +128,20 @@ class RegistrationPage extends React.Component<RegistrationPageProps, Registrati
                     <div className='row justify-content-center'>
                         <div className='col-8'>
                             <Form className='login-form rounded p-3' onSubmit={this.handleSubmit}>
+                               
                                 <Form.Group>
-                                    <Form.Label>Username</Form.Label>
-                                    <Form.Control
-                                    id='username'
-                                    placeholder='Enter your username'
-                                    type='text'
-                                    value={this.state.username}
-                                    onChange={this.handleChange}></Form.Control>
+                                    <Form.Label>Username (check if you want to be creator)</Form.Label>
+                                    <InputGroup>
+                                        <Form.Control
+                                        id='username'
+                                        placeholder='Enter your username'
+                                        type='text'
+                                        value={this.state.username}
+                                        onChange={this.handleChange}></Form.Control>
+                                        <InputGroup.Checkbox id='isCreator' checked={this.state.isCreator} onChange={this.checkCreator} />
+                                    </InputGroup>
                                 </Form.Group>
+                               
                                 <Row>
                                     <Form.Group as={Col}>
                                         <Form.Label>First name</Form.Label>
