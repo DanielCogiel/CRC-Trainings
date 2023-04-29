@@ -27,14 +27,14 @@ class App extends React.Component<AppProps, AppState> {
         { routes.map((route: RouteModel, idx: number) => { return <Route key={idx} path={route.path} element={route.component} /> }) }
       </Routes>
       <ToastContainer
-        position="top-right"
+        position="bottom-right"
         autoClose={3000}
         hideProgressBar={false}
         newestOnTop={false}
         rtl={false}
         pauseOnFocusLoss
         pauseOnHover
-        style={{top: '120px', fontSize: '20px' }}
+        style={{ fontSize: '20px' }}
       />
     </>
     );

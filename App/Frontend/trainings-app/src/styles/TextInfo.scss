@@ -6,6 +6,7 @@
     border-top-right-radius: 10px;
     border-bottom-right-radius: 10px;
     width: 100%;
+    position: relative;
 
     .coursename-wrapper {
         display: flex;
@@ -33,7 +34,7 @@
         gap: 10px;
         row-gap: 30px;
         padding: 10px;
-        font-size: 20px;
+        font-size: 19px;
         font-weight: bold;
 
         .training-content-item {
@@ -49,6 +50,26 @@
             span {
                 margin-left: 10px;
             }
+        }
+    }
+
+    .delete-button {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        background-color: red;
+        border: none;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+
+        i {
+            color: white;
+            padding: 2px;
+        }
+
+        &:hover {
+            opacity: 0.5;
         }
     }
 }

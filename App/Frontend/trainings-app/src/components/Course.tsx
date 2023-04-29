@@ -21,7 +21,7 @@ class Course extends React.Component<CourseProps, CourseState> {
     render() { 
         return ( 
             <div className='card'>
-                <CourseBanner imgURL={pythonIcon} />
+                <CourseBanner imgURL={pythonIcon} id={this.props.course.id!} isEnrolled={!!this.props.course.isEnrolled} />
                 <TextInfo course={this.props.course} />
             </div>
          );

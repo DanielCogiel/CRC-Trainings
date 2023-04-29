@@ -29,7 +29,7 @@ class TextInfo extends React.Component<TextInfoProps, TextInfoState> {
                     <h1>{this.props.course.title}</h1>
                 </div>
                 <div className="training-content-grid">
-                    <TextLabel text={`${this.props.course.date.start} - ${this.props.course.date.finish}`} imgURL={calendarIcon} />
+                    <TextLabel text={`${this.props.course.date.start} / ${this.props.course.date.finish}`} imgURL={calendarIcon} />
                     <TextLabel text={`${this.props.course.hours.start} - ${this.props.course.hours.finish}
                      (x${this.props.course.hours.times})`} imgURL={clockIcon} />
                     <TextLabel text={this.props.course.language} imgURL={languageIcon} />
@@ -37,6 +37,7 @@ class TextInfo extends React.Component<TextInfoProps, TextInfoState> {
                     <TextLabel text={this.props.course.location} imgURL={locationIcon} />
                     <TextLabel text={this.props.course.trainer} imgURL={trainerIcon} />
                 </div>
+                { this.props.course.isOwner && <button className='delete-button'><i className="material-icons">delete</i></button> }
             </div>
         );
     }
