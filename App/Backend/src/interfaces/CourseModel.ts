@@ -1,5 +1,7 @@
 interface CourseModel {
     id: number,
+    owner_id?: number,
+    owner?: string,
     title: string,
     language: string,
     date: {
@@ -13,7 +15,9 @@ interface CourseModel {
     },
     level: string,
     location: string,
-    trainer: string
+    trainer: string,
+    isEnrolled?: boolean,
+    isOwner?: boolean
 }
 
 export default CourseModel;

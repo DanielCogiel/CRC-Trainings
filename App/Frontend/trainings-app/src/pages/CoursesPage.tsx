@@ -5,6 +5,7 @@ import Course from '../components/Course';
 import CourseModel from '../interfaces/CourseModel';
 import Preloader from '../components/Preloader';
 import { API_URLS } from '../config/api';
+import { toast } from 'react-toastify';
 import '../styles/CoursesPage.scss'
 
 interface CoursesPageProps {
@@ -29,28 +30,29 @@ class CoursesPage extends React.Component<CoursesPageProps, CoursesPageState> {
 
     async getCourses(): Promise<void> {
         try {
-            const response = await fetch(this.ENDPOINT);
+            const response = await fetch(`${this.ENDPOINT}?username=${sessionStorage.getItem('username')}`);
             const data = await response.json();
             this.setState({
                 courses: data,
                 isLoading: false
             });
+            console.log(data)
         } catch (error) {
-            console.error('Could not fetch data.')
+            toast.info('Could not fetch data.')
         } 
     }
 
     componentDidMount(): void {
-        this.getCourses();    
+        this.getCourses();
     }
 
     render() { 
         return ( 
-            <MainLayout> 
+            <MainLayout>
                 { this.state.isLoading ? <Preloader /> :
-                    <main id='container'>
-                        {this.state.courses.map(course => <Course key={course.id} course={course} />)}
-                    </main>
+                <main id='container'>
+                  {this.state.courses.map(course => <Course key={course.id} course={course} />)}
+                </main>
                 }
             </MainLayout>
         );

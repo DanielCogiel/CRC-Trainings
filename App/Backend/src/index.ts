@@ -136,14 +136,89 @@ const PORT: number = 4000;
 
 app.use(express.json(), cors());
 
+//gets all courses
 app.get(`${API_URL}${COURSES_URL}/all`, (req: Request, res: Response) => {
-    res.json(courses);
+    let data: CourseModel[] = [];
+    connection.query('SELECT Users.id FROM Users WHERE Users.username = ?', [req.query.username], (error, id_row) => {
+        const user_id = id_row[0].id;
+        connection.query('SELECT Courses.id AS course_id, Enrolled.user_id AS enroll_id, Courses.owner_id AS owner_id FROM Users JOIN Enrolled ON Users.id = Enrolled.user_id RIGHT JOIN Courses ON Enrolled.course_id = Courses.id WHERE Courses.owner_id = ? OR Enrolled.user_id = ?;',
+        [user_id, user_id], (error, bindedCoursesData) => {
+            connection.query('SELECT Courses.id, Courses.level, Users.username, Courses.title, Courses.language, Courses.dateStart, Courses.dateFinish, Courses.hoursStart, Courses.hoursFinish, Courses.hoursTimes, Courses.location, Courses.trainer FROM Courses JOIN Users ON Courses.owner_id = Users.id', [], 
+            (error1, result) => {
+                if (!error1) {
+                    result.map((course: any) => {
+                        let formattedLevel = course.level.toLowerCase().slice(1);
+                        formattedLevel = course.level.charAt(0) + formattedLevel;
+                        data = [...data, {
+                            id: course.id,
+                            owner: course.username,
+                            title: course.title,
+                            language: mapLanguage(course.language, true).toUpperCase(),
+                            date: {
+                                start: new Date(course.dateStart).toISOString().slice(0,10),
+                                finish: new Date(course.dateFinish).toISOString().slice(0,10)
+                            },
+                            hours: {
+                                start: course.hoursStart.slice(0, 5),
+                                finish: course.hoursFinish.slice(0, 5),
+                                times: course.hoursTimes
+                            },
+                            level: formattedLevel,
+                            location: course.location,
+                            trainer: course.trainer,
+                            isEnrolled: !!bindedCoursesData.find((elem: any) => elem.course_id === course.id && elem.enroll_id === user_id),
+                            isOwner: !!bindedCoursesData.find((elem: any) => elem.course_id === course.id && elem.owner_id === user_id)
+                        }]
+                    })
+                    res.json(data);
+                } else {
+                    res.status(500).json({message: 'SQL error: ' + error1.stack});
+                }
+            })
+        })
+    })
 })
+
 
 app.get(`${API_URL}${COURSES_URL}/personal`, (req: Request, res: Response) => {
     res.json(personalCourses);
 })
 
+//enrolls user to course
+app.post(`${API_URL}${COURSES_URL}/:id/enroll`, (req: Request, res: Response) => {
+    const course_id = parseInt(req.params.id);
+    const username = req.body.username;
+
+    connection.query('SELECT * FROM Users WHERE username = ?', [username], (error, result) => {
+        if (error) {
+            res.status(500).send('SQL Error: ' + error.stack)
+        } else {
+            connection.query("SELECT * FROM Enrolled WHERE user_id = ? AND course_id = ?", [result[0].id, course_id], (error1, result1) => {
+                if (error1) {
+                    res.status(500).send('SQL Error: '+ error1.stack)
+                } else {
+                    if (result1.length > 0) {
+                        res.status(500).send('You already enrolled to this course.')
+                    } else {
+                        connection.query('INSERT INTO Enrolled(user_id, course_id) VALUES(?, ?)', [result[0].id, course_id], (error2, result2) => {
+                            if (error2) {
+                                res.status(500).send('SQL Error: ' + error2.stack)
+                            } else {
+                                if (result2.affectedRows > 0) {
+                                    res.send('Successfully enrolled to course.');
+                                } else {
+                                    res.status(500).send('Could not enroll to this course.');
+                                }
+                            }
+                        })
+                    }
+                }
+            })
+        }
+    })
+}) 
+
+//registers course
 app.post(`${API_URL}${COURSES_URL}/register`, (req: Request, res: Response) => {
     const {username, title, language, date, hours, level, location, trainer} = req.body
     const dateStart = date.start;
@@ -180,6 +255,7 @@ app.post(`${API_URL}${COURSES_URL}/register`, (req: Request, res: Response) => {
     })
 })
 
+//registers user
 app.post(`${API_URL}/register`, (req: Request, res: Response) => {
     const {username, password, name, surname, email, isCreator} = req.body;
 
@@ -199,6 +275,7 @@ app.post(`${API_URL}/register`, (req: Request, res: Response) => {
     }));
 })
 
+//logs user in
 app.post(`${API_URL}/login`, (req: Request, res: Response) => {
     const {username, password} = req.body;
 
