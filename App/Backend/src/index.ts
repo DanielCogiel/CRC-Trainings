@@ -3,6 +3,7 @@ import mysql from 'mysql';
 import CourseModel from './interfaces/CourseModel';
 import mapLanguage from './utility/mappers';
 import cors from 'cors';
+import bcrypt from 'bcrypt'
 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -71,7 +72,7 @@ app.get(`${API_URL}${COURSES_URL}/all`, (req: Request, res: Response) => {
     })
 })
 
-
+//get personal courses
 app.get(`${API_URL}${COURSES_URL}/personal`, (req: Request, res: Response) => {
     let data: CourseModel[] = [];
     connection.query('SELECT Users.id FROM Users WHERE Users.username = ?', [req.query.username], (error, id_row) => {
@@ -118,6 +119,7 @@ app.get(`${API_URL}${COURSES_URL}/personal`, (req: Request, res: Response) => {
     })
 })
 
+//deletes given course
 app.delete(`${API_URL}${COURSES_URL}/:id/delete`, (req: Request, res: Response) => {
     const username = req.body.username
     const course_id = req.params.id
@@ -141,6 +143,7 @@ app.delete(`${API_URL}${COURSES_URL}/:id/delete`, (req: Request, res: Response) 
     })
 })
 
+//user leaves the course
 app.delete(`${API_URL}${COURSES_URL}/:id/leave`, (req: Request, res: Response) => {
     const course_id = parseInt(req.params.id);
     const username = req.body.username;
@@ -234,20 +237,27 @@ app.post(`${API_URL}${COURSES_URL}/register`, (req: Request, res: Response) => {
 app.post(`${API_URL}/register`, (req: Request, res: Response) => {
     const {username, password, name, surname, email, isCreator} = req.body;
 
-    connection.query('SELECT * FROM Users WHERE username = ?', [username], ((error, results) => {
-        if (!error && results.length > 0) {
-            res.status(303).send(`User ${username} already exists.`)
-        } else {
-            connection.query('INSERT INTO Users(username, password, name, surname, email, role) VALUES (?, ?, ?, ?, ?, ?)', 
-            [username, password, name, surname, email, isCreator ? 'CREATOR' : 'REGULAR'], (error, result) => {
-                if (error) {
-                    res.status(500).send('Error inserting user into database.');
+    bcrypt.genSalt(10, (errorSalt: Error | undefined, salt: string) => {
+        if (!errorSalt) {
+        bcrypt.hash(password, salt, (errorHash: Error | undefined, hashedPassword: string) => {
+            connection.query('SELECT * FROM Users WHERE username = ?', [username], ((error, results) => {
+                if (!error && results.length > 0) {
+                    res.status(303).send(`User ${username} already exists.`)
                 } else {
-                    res.send('User added succesfully.')
+                    connection.query('INSERT INTO Users(username, password, name, surname, email, role) VALUES (?, ?, ?, ?, ?, ?)', 
+                    [username, hashedPassword, name, surname, email, isCreator ? 'CREATOR' : 'REGULAR'], (error, result) => {
+                        if (error) {
+                            res.status(500).send('Error inserting user into database.');
+                        } else {
+                            res.send('User added succesfully.')
+                        }
+                    })
                 }
-            })
+            }));
+        })} else {
+            res.status(500).send('Internal server error.')
         }
-    }));
+    })
 })
 
 //logs user in
@@ -262,18 +272,20 @@ app.post(`${API_URL}/login`, (req: Request, res: Response) => {
             })
         } else {
             if (result.length > 0) {
-                if (result[0].password === password) {
-                    res.json({
-                        isAuthenticated: true,
-                        role: result[0].role,
-                        message: 'Login successful.'
-                    });
-                } else {
-                    res.status(500).json({
-                        isAuthenticated: false,
-                        message: 'Incorrect password.'
-                    })
-                }
+                bcrypt.compare(password, result[0].password, (error, isAuthenticated) => {
+                    if (isAuthenticated) {
+                        res.json({
+                            isAuthenticated: true,
+                            role: result[0].role,
+                            message: 'Login successful.'
+                        });
+                    } else {
+                        res.status(500).json({
+                            isAuthenticated: false,
+                            message: 'Incorrect password.'
+                        })
+                    }
+                })
             } else {
                 res.status(500).json({
                     isAuthenticated: false,
