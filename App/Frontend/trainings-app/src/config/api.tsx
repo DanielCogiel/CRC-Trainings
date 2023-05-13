@@ -5,7 +5,7 @@ const LOGIN_URL = `${API_URL}/login`
 export const COURSES_API_URL = `${API_URL}/courses`
 const REGISTER_COURSE_URL = `${COURSES_API_URL}/register`
 const ALL_COURSES_URL = `${COURSES_API_URL}/all`
-const PERSONAL_COURSES_URL = `${COURSES_API_URL}/personal`
+export const PERSONAL_COURSES_URL = `${COURSES_API_URL}/personal`
 
 export const API_URLS = {
     COURSES: {

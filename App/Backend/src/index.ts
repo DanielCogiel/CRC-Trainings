@@ -119,6 +119,25 @@ app.get(`${API_URL}${COURSES_URL}/personal`, (req: Request, res: Response) => {
     })
 })
 
+app.get(`${API_URL}${COURSES_URL}/personal/count`, (req: Request, res: Response) => {
+    connection.query('SELECT Users.id FROM Users WHERE Users.username = ?', [req.query.username], (error, id_row) => {
+        if (error) {
+            res.json({message: ('SQL Error: ' + error.stack)})
+        } else {
+            const user_id = id_row[0].id;
+            connection.query('SELECT Courses.id AS course_id, Enrolled.user_id AS enroll_id, Courses.owner_id AS owner_id FROM Users JOIN Enrolled ON Users.id = Enrolled.user_id RIGHT JOIN Courses ON Enrolled.course_id = Courses.id WHERE Courses.owner_id = ? OR Enrolled.user_id = ?;',
+            [user_id, user_id], (err, bindedCoursesData) => {
+                if (err) {
+                    res.json({message: ('SQL Error: ' + err.stack)})
+                }
+                else {
+                    res.json({count: bindedCoursesData.length})
+                }   
+            })
+        }
+    })
+})
+
 //deletes given course
 app.delete(`${API_URL}${COURSES_URL}/:id/delete`, (req: Request, res: Response) => {
     const username = req.body.username
