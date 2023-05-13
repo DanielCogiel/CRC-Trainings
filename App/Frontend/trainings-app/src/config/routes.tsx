@@ -23,12 +23,14 @@ const routes: RouteModel[] = [
     {
         path: `${COURSES_URL}/personal`,
         component: <AuthWrapper><PersonalCoursesPage /></AuthWrapper>,
-        HeaderRouteName: 'My courses'
+        HeaderRouteName: 'My courses',
+        hasNotificationNumber: true
     },
     {
         path: `${COURSES_URL}/register`,
         component: <AuthWrapper><CourseRegistrationPage /></AuthWrapper>,
-        HeaderRouteName: 'Register new course'
+        HeaderRouteName: 'Register new course',
+        isCreatorOnly: true
     },
     {
         path: '/login',
