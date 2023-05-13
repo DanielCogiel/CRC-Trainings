@@ -184,6 +184,29 @@ app.get(`${API_URL}${COURSES_URL}/personal`, (req: Request, res: Response) => {
     res.json(personalCourses);
 })
 
+app.delete(`${API_URL}${COURSES_URL}/:id/delete`, (req: Request, res: Response) => {
+    const username = req.body.username
+    const course_id = req.params.id
+    connection.query('SELECT * FROM Users JOIN Courses ON Users.id = Courses.owner_id WHERE username = ? AND Courses.id = ?',
+    [username, course_id], (error, result) => {
+        if (error) {
+            res.status(500).send('SQL Error: ' + error.stack)
+        } else {
+            if (result.length > 0) {
+                connection.query('DELETE FROM Courses WHERE Courses.id = ?', [result[0].id], (error, deleteResult) => {
+                    if (error) {
+                        res.status(500).send('Could not delete given course.')
+                    } else {
+                        res.send('Course successfully deleted.')
+                    }
+                })
+            } else {
+                res.status(500).send('Such course does not exist or you are not owner of this course.')
+            }
+        }
+    })
+})
+
 //enrolls user to course
 app.post(`${API_URL}${COURSES_URL}/:id/enroll`, (req: Request, res: Response) => {
     const course_id = parseInt(req.params.id);
@@ -226,6 +249,8 @@ app.post(`${API_URL}${COURSES_URL}/register`, (req: Request, res: Response) => {
     const hoursStart = hours.start;
     const hoursFinish = hours.finish;
     const hoursTimes = hours.times;
+
+    console.log(req.body.image)
 
     connection.query('SELECT * FROM Users WHERE username = ?', [username], (error, result) => {
         if (error) {

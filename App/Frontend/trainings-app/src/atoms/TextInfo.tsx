@@ -8,20 +8,43 @@ import levelIcon from '../resources/icons/level_icon.svg'
 import locationIcon from '../resources/icons/location_icon.svg'
 import trainerIcon from '../resources/icons/trainer_logo.svg'
 import '../styles/TextInfo.scss'
+import { COURSES_API_URL } from "../config/api";
+import { toast } from 'react-toastify';
 
 interface TextInfoProps {
-    course: CourseModel
+    course: CourseModel,
+    deleteElem: Function
 }
  
-interface TextInfoState {
-    
-}
+interface TextInfoState {}
  
 class TextInfo extends React.Component<TextInfoProps, TextInfoState> {
     constructor(props: TextInfoProps) {
         super(props);
         this.state = {};
     }
+
+    deleteCourse = () => {
+        let errorStatus = 200;
+        fetch(`${COURSES_API_URL}/${this.props.course.id}/delete`, {
+            method: 'DELETE',
+            body: JSON.stringify({username: sessionStorage.getItem('username')}),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            errorStatus = response.status;
+            return response.text()
+        })
+        .then(message => {
+            if (errorStatus === 200) {
+                this.props.deleteElem();
+            }
+            toast.info(message)
+        })
+    }
+
     render() { 
         return (
             <div className="training-content">
@@ -37,7 +60,7 @@ class TextInfo extends React.Component<TextInfoProps, TextInfoState> {
                     <TextLabel text={this.props.course.location} imgURL={locationIcon} />
                     <TextLabel text={this.props.course.trainer} imgURL={trainerIcon} />
                 </div>
-                { this.props.course.isOwner && <button className='delete-button'><i className="material-icons">delete</i></button> }
+                { this.props.course.isOwner && <button onClick={this.deleteCourse} className='delete-button'><i className="material-icons">delete</i></button> }
             </div>
         );
     }
