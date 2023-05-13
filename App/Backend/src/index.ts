@@ -148,7 +148,7 @@ app.delete(`${API_URL}${COURSES_URL}/:id/leave`, (req: Request, res: Response) =
             if (result.affectedRows === 1) {
                 res.send('Successfully left course.')
             } else {
-                res.status(500).json({message: 'Could not leave from course.'})
+                res.status(500).send('Could not leave from course.')
             }
         }
     })  
