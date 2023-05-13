@@ -23,77 +23,6 @@ connection.connect(error => {
 const API_URL: string = '/api'
 const COURSES_URL: string = '/courses'
 
-const courses: CourseModel[] = [
-    {
-        id: 1,
-        title: "Python course for beginners",
-        language: "PL",
-        date: {
-            start: "01.12.2023",
-            finish: "31.12.2023"
-        },
-        hours: {
-            start: "8:00",
-            finish: "16:00",
-            times: 8
-        },
-        level: "Basic",
-        location: "Remote",
-        trainer: "Jan Kowalski"
-    },
-    {
-        id: 2,
-        title: "Python course for intermediates",
-        language: "EN",
-        date: {
-            start: "05.05.2023",
-            finish: "30.06.2023"
-        },
-        hours: {
-            start: "8:00",
-            finish: "18:00",
-            times: 4
-        },
-        level: "Intermediate",
-        location: "Remote",
-        trainer: "Jan Nowak"
-    },
-    {
-        id: 3,
-        title: "Python course for beginners",
-        language: "PL",
-        date: {
-            start: "01.12.2023",
-            finish: "31.12.2023"
-        },
-        hours: {
-            start: "8:00",
-            finish: "16:00",
-            times: 8
-        },
-        level: "Basic",
-        location: "Remote",
-        trainer: "Jan Kowalski"
-    },
-    {
-        id: 4,
-        title: "Python course for intermediates",
-        language: "EN",
-        date: {
-            start: "05.05.2023",
-            finish: "30.06.2023"
-        },
-        hours: {
-            start: "8:00",
-            finish: "18:00",
-            times: 4
-        },
-        level: "Intermediate",
-        location: "Remote",
-        trainer: "Jan Nowak"
-    }
-]
-
 const personalCourses: CourseModel[] = [
     {
         id: 1,
@@ -207,6 +136,24 @@ app.delete(`${API_URL}${COURSES_URL}/:id/delete`, (req: Request, res: Response) 
     })
 })
 
+app.delete(`${API_URL}${COURSES_URL}/:id/leave`, (req: Request, res: Response) => {
+    const course_id = parseInt(req.params.id);
+    const username = req.body.username;
+
+    connection.query('DELETE e FROM Enrolled e JOIN Users ON e.user_id = Users.id WHERE Users.username = ? AND e.course_id = ?', 
+    [username, course_id], (error, result) => {
+        if (error) {
+            res.status(500).send('SQL Error: ' + error.stack)
+        } else {
+            if (result.affectedRows === 1) {
+                res.send('Successfully left course.')
+            } else {
+                res.status(500).json({message: 'Could not leave from course.'})
+            }
+        }
+    })  
+})
+
 //enrolls user to course
 app.post(`${API_URL}${COURSES_URL}/:id/enroll`, (req: Request, res: Response) => {
     const course_id = parseInt(req.params.id);
@@ -249,8 +196,6 @@ app.post(`${API_URL}${COURSES_URL}/register`, (req: Request, res: Response) => {
     const hoursStart = hours.start;
     const hoursFinish = hours.finish;
     const hoursTimes = hours.times;
-
-    console.log(req.body.image)
 
     connection.query('SELECT * FROM Users WHERE username = ?', [username], (error, result) => {
         if (error) {
