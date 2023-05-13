@@ -10,19 +10,29 @@ interface CourseProps {
 }
  
 interface CourseState {
-    
+    isHidden: boolean
 }
  
 class Course extends React.Component<CourseProps, CourseState> {
     constructor(props: CourseProps) {
         super(props);
-        this.state = {};
+        this.state = {
+            isHidden: false
+        };
     }
+
+    hideElement = (): void => {
+        this.setState({
+            ...this.state,
+            isHidden: true
+        })
+    }
+
     render() { 
         return ( 
-            <div className='card'>
+            <div style={{display: this.state.isHidden ? 'none' : 'flex'}} className='card'>
                 <CourseBanner imgURL={pythonIcon} id={this.props.course.id!} isEnrolled={!!this.props.course.isEnrolled} />
-                <TextInfo course={this.props.course} />
+                <TextInfo deleteElem={this.hideElement} course={this.props.course} />
             </div>
          );
     }
