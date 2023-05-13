@@ -22,46 +22,9 @@ connection.connect(error => {
 
 const API_URL: string = '/api'
 const COURSES_URL: string = '/courses'
-
-const personalCourses: CourseModel[] = [
-    {
-        id: 1,
-        title: "Python course for beginners",
-        language: "PL",
-        date: {
-            start: "01.12.2023",
-            finish: "31.12.2023"
-        },
-        hours: {
-            start: "8:00",
-            finish: "16:00",
-            times: 8
-        },
-        level: "Basic",
-        location: "Remote",
-        trainer: "Jan Kowalski"
-    },
-    {
-        id: 2,
-        title: "Python course for intermediates",
-        language: "EN",
-        date: {
-            start: "05.05.2023",
-            finish: "30.06.2023"
-        },
-        hours: {
-            start: "8:00",
-            finish: "18:00",
-            times: 4
-        },
-        level: "Intermediate",
-        location: "Remote",
-        trainer: "Jan Nowak"
-    }
-]
+const PORT: number = 4000;
 
 const app: Express = express();
-const PORT: number = 4000;
 
 app.use(express.json(), cors());
 
@@ -110,7 +73,49 @@ app.get(`${API_URL}${COURSES_URL}/all`, (req: Request, res: Response) => {
 
 
 app.get(`${API_URL}${COURSES_URL}/personal`, (req: Request, res: Response) => {
-    res.json(personalCourses);
+    let data: CourseModel[] = [];
+    connection.query('SELECT Users.id FROM Users WHERE Users.username = ?', [req.query.username], (error, id_row) => {
+        const user_id = id_row[0].id;
+        connection.query('SELECT Courses.id AS course_id, Enrolled.user_id AS enroll_id, Courses.owner_id AS owner_id FROM Users JOIN Enrolled ON Users.id = Enrolled.user_id RIGHT JOIN Courses ON Enrolled.course_id = Courses.id WHERE Courses.owner_id = ? OR Enrolled.user_id = ?;',
+        [user_id, user_id], (error, bindedCoursesData) => {
+            connection.query('SELECT Courses.id, Courses.level, Users.username, Courses.title, Courses.language, Courses.dateStart, Courses.dateFinish, Courses.hoursStart, Courses.hoursFinish, Courses.hoursTimes, Courses.location, Courses.trainer FROM Courses JOIN Users ON Courses.owner_id = Users.id', [], 
+            (error1, result) => {
+                if (!error1) {
+                    result.map((course: any) => {
+                        let formattedLevel = course.level.toLowerCase().slice(1);
+                        formattedLevel = course.level.charAt(0) + formattedLevel;
+                        const isEnrolled: boolean = !!bindedCoursesData.find((elem: any) => elem.course_id === course.id && elem.enroll_id === user_id)
+                        const isOwner: boolean = !!bindedCoursesData.find((elem: any) => elem.course_id === course.id && elem.owner_id === user_id)
+                        if (isEnrolled || isOwner) {
+                            data = [...data, {
+                                id: course.id,
+                                owner: course.username,
+                                title: course.title,
+                                language: mapLanguage(course.language, true).toUpperCase(),
+                                date: {
+                                    start: new Date(course.dateStart).toISOString().slice(0,10),
+                                    finish: new Date(course.dateFinish).toISOString().slice(0,10)
+                                },
+                                hours: {
+                                    start: course.hoursStart.slice(0, 5),
+                                    finish: course.hoursFinish.slice(0, 5),
+                                    times: course.hoursTimes
+                                },
+                                level: formattedLevel,
+                                location: course.location,
+                                trainer: course.trainer,
+                                isEnrolled: isEnrolled,
+                                isOwner: isOwner
+                            }]
+                        }
+                    })
+                    res.json(data);
+                } else {
+                    res.status(500).json({message: 'SQL error: ' + error1.stack});
+                }
+            })
+        })
+    })
 })
 
 app.delete(`${API_URL}${COURSES_URL}/:id/delete`, (req: Request, res: Response) => {
