@@ -17,7 +17,8 @@ interface CourseModel {
     location: string,
     trainer: string,
     isEnrolled?: boolean,
-    isOwner?: boolean
+    isOwner?: boolean,
+    image?: any
 }
 
 export default CourseModel;

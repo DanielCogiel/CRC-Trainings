@@ -2,8 +2,8 @@ import React from 'react';
 import CourseModel from '../interfaces/CourseModel'
 import TextInfo from '../atoms/TextInfo';
 import CourseBanner from '../atoms/CourseBanner';
-import pythonIcon from '../resources/images/python_icon.svg'
 import '../styles/Course.scss'
+import { SERVER_URL } from '../config/api';
 
 interface CourseProps {
     course: CourseModel;
@@ -31,7 +31,7 @@ class Course extends React.Component<CourseProps, CourseState> {
     render() { 
         return ( 
             <div style={{display: this.state.isHidden ? 'none' : 'flex'}} className='card'>
-                <CourseBanner imgURL={pythonIcon} id={this.props.course.id!} isEnrolled={!!this.props.course.isEnrolled} />
+                <CourseBanner imgURL={`${SERVER_URL}/${this.props.course.image}`} id={this.props.course.id!} isEnrolled={!!this.props.course.isEnrolled} />
                 <TextInfo deleteElem={this.hideElement} course={this.props.course} />
             </div>
          );
