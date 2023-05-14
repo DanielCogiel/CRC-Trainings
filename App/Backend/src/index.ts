@@ -4,6 +4,8 @@ import CourseModel from './interfaces/CourseModel';
 import mapLanguage from './utility/mappers';
 import cors from 'cors';
 import bcrypt from 'bcrypt'
+import multer from 'multer';
+import fs from 'fs'
 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -21,13 +23,19 @@ connection.connect(error => {
     console.log('Connection with database established.')
 })
 
+const upload = multer({
+    dest: 'uploads/'
+})
+
 const API_URL: string = '/api'
 const COURSES_URL: string = '/courses'
 const PORT: number = 4000;
 
 const app: Express = express();
 
-app.use(express.json(), cors());
+app.use(express.json());
+app.use(cors());
+app.use('/uploads', express.static('uploads'))
 
 //gets all courses
 app.get(`${API_URL}${COURSES_URL}/all`, (req: Request, res: Response) => {
@@ -36,7 +44,7 @@ app.get(`${API_URL}${COURSES_URL}/all`, (req: Request, res: Response) => {
         const user_id = id_row[0].id;
         connection.query('SELECT Courses.id AS course_id, Enrolled.user_id AS enroll_id, Courses.owner_id AS owner_id FROM Users JOIN Enrolled ON Users.id = Enrolled.user_id RIGHT JOIN Courses ON Enrolled.course_id = Courses.id WHERE Courses.owner_id = ? OR Enrolled.user_id = ?;',
         [user_id, user_id], (error, bindedCoursesData) => {
-            connection.query('SELECT Courses.id, Courses.level, Users.username, Courses.title, Courses.language, Courses.dateStart, Courses.dateFinish, Courses.hoursStart, Courses.hoursFinish, Courses.hoursTimes, Courses.location, Courses.trainer FROM Courses JOIN Users ON Courses.owner_id = Users.id', [], 
+            connection.query('SELECT Courses.id, Courses.level, Users.username, Courses.title, Courses.language, Courses.dateStart, Courses.dateFinish, Courses.hoursStart, Courses.hoursFinish, Courses.hoursTimes, Courses.location, Courses.trainer, Courses.imagePath FROM Courses JOIN Users ON Courses.owner_id = Users.id', [], 
             (error1, result) => {
                 if (!error1) {
                     result.map((course: any) => {
@@ -60,7 +68,8 @@ app.get(`${API_URL}${COURSES_URL}/all`, (req: Request, res: Response) => {
                             location: course.location,
                             trainer: course.trainer,
                             isEnrolled: !!bindedCoursesData.find((elem: any) => elem.course_id === course.id && elem.enroll_id === user_id),
-                            isOwner: !!bindedCoursesData.find((elem: any) => elem.course_id === course.id && elem.owner_id === user_id)
+                            isOwner: !!bindedCoursesData.find((elem: any) => elem.course_id === course.id && elem.owner_id === user_id),
+                            image: course.imagePath
                         }]
                     })
                     res.json(data);
@@ -79,7 +88,7 @@ app.get(`${API_URL}${COURSES_URL}/personal`, (req: Request, res: Response) => {
         const user_id = id_row[0].id;
         connection.query('SELECT Courses.id AS course_id, Enrolled.user_id AS enroll_id, Courses.owner_id AS owner_id FROM Users JOIN Enrolled ON Users.id = Enrolled.user_id RIGHT JOIN Courses ON Enrolled.course_id = Courses.id WHERE Courses.owner_id = ? OR Enrolled.user_id = ?;',
         [user_id, user_id], (error, bindedCoursesData) => {
-            connection.query('SELECT Courses.id, Courses.level, Users.username, Courses.title, Courses.language, Courses.dateStart, Courses.dateFinish, Courses.hoursStart, Courses.hoursFinish, Courses.hoursTimes, Courses.location, Courses.trainer FROM Courses JOIN Users ON Courses.owner_id = Users.id', [], 
+            connection.query('SELECT Courses.id, Courses.level, Users.username, Courses.title, Courses.language, Courses.dateStart, Courses.dateFinish, Courses.hoursStart, Courses.hoursFinish, Courses.hoursTimes, Courses.location, Courses.trainer, Courses.imagePath FROM Courses JOIN Users ON Courses.owner_id = Users.id', [], 
             (error1, result) => {
                 if (!error1) {
                     result.map((course: any) => {
@@ -106,7 +115,8 @@ app.get(`${API_URL}${COURSES_URL}/personal`, (req: Request, res: Response) => {
                                 location: course.location,
                                 trainer: course.trainer,
                                 isEnrolled: isEnrolled,
-                                isOwner: isOwner
+                                isOwner: isOwner,
+                                image: course.imagePath
                             }]
                         }
                     })
@@ -153,6 +163,7 @@ app.delete(`${API_URL}${COURSES_URL}/:id/delete`, (req: Request, res: Response) 
                         res.status(500).send('Could not delete given course.')
                     } else {
                         res.send('Course successfully deleted.')
+                        fs.unlink(result[0].imagePath, (error) => {})
                     }
                 })
             } else {
@@ -216,13 +227,13 @@ app.post(`${API_URL}${COURSES_URL}/:id/enroll`, (req: Request, res: Response) =>
 }) 
 
 //registers course
-app.post(`${API_URL}${COURSES_URL}/register`, (req: Request, res: Response) => {
+app.post(`${API_URL}${COURSES_URL}/register`, upload.single('image'), (req: Request, res: Response) => {
     const {username, title, language, date, hours, level, location, trainer} = req.body
-    const dateStart = date.start;
-    const dateFinish = date.finish;
-    const hoursStart = hours.start;
-    const hoursFinish = hours.finish;
-    const hoursTimes = hours.times;
+    const dateStart = JSON.parse(date).start;
+    const dateFinish = JSON.parse(date).finish;
+    const hoursStart = JSON.parse(hours).start;
+    const hoursFinish = JSON.parse(hours).finish;
+    const hoursTimes = JSON.parse(hours).times;
 
     connection.query('SELECT * FROM Users WHERE username = ?', [username], (error, result) => {
         if (error) {
@@ -231,9 +242,9 @@ app.post(`${API_URL}${COURSES_URL}/register`, (req: Request, res: Response) => {
             if (result.length > 0) {
                 const owner_id = result[0].id;
 
-                connection.query('INSERT INTO Courses(owner_id, title, language, dateStart, dateFinish, hoursStart, hoursFinish, hoursTimes, level, location, trainer) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                connection.query('INSERT INTO Courses(owner_id, title, language, dateStart, dateFinish, hoursStart, hoursFinish, hoursTimes, level, location, trainer, imagePath) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                 [owner_id, title, mapLanguage(language), dateStart, dateFinish,
-                     hoursStart, hoursFinish, hoursTimes, level.toUpperCase(), location, trainer], 
+                     hoursStart, hoursFinish, hoursTimes, level.toUpperCase(), location, trainer, req.file?.path], 
                      (error: mysql.MysqlError | null, result: mysql.OkPacket) => {
                         if (error) {
                             res.status(500).send('SQL Error: ' + error.stack)

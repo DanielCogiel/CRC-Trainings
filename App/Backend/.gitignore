@@ -6,6 +6,7 @@ package-lock.json
 
 .vscode
 TRAININGS DATABASE.session.sql
+uploads
 
 # Coveralls
 .nyc_output

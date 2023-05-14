@@ -22,6 +22,7 @@ interface CourseRegistrationPageState extends CourseModel {
  
 class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps, CourseRegistrationPageState> {
     ENDPOINT: string = API_URLS.COURSES.REGISTER;
+    UPLOAD_ENDPOINT: string = API_URLS.FILES.UPLOAD;
 
     constructor(props: CourseRegistrationPageProps) {
         super(props);
@@ -42,7 +43,8 @@ class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps
             trainer: '',
             isRemote: false,
             redirect: false,
-            validated: false
+            validated: false,
+            image: undefined
         };
     }
 
@@ -95,35 +97,31 @@ class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps
         const form = event.currentTarget;
         if (form.checkValidity()) {
             this.postCourse();
+            // this.postImage();
         }
     }
 
     async postCourse(): Promise<void> {
-        const data: CourseModel = {
-            username: sessionStorage.getItem('username'),
-            title: this.state.title,
-            language: this.state.language.toLowerCase(),
-            date: {
-                start: this.state.date.start,
-                finish: this.state.date.finish
-            },
-            hours: {
-                start: this.state.hours.start,
-                finish: this.state.hours.finish,
-                times: this.state.hours.times
-            },
-            level: this.state.level.toLowerCase(),
-            location: this.state.location,
-            trainer: this.state.trainer
-        }
+        let formData = new FormData();
+
+        formData.append('username', sessionStorage.getItem('username') || '');
+        formData.append('title', this.state.title);
+        formData.append('language', this.state.language.toLowerCase());
+        formData.append('date', JSON.stringify({start: this.state.date.start, finish: this.state.date.finish}))
+        formData.append('hours', JSON.stringify({
+            start: this.state.hours.start,
+            finish: this.state.hours.finish,
+            times: this.state.hours.times
+        }))
+        formData.append('level', this.state.level.toLowerCase())
+        formData.append('location', this.state.location)
+        formData.append('trainer', this.state.trainer)
+        formData.append('image', this.state.image)
 
         try {
             const response = await fetch(this.ENDPOINT, {
                 method: 'POST',
-                body: JSON.stringify(data),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+                body: formData
             });
             const message = await response.text();
             toast.info(message);
@@ -134,6 +132,27 @@ class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps
         } catch (error: any) {}
     }
 
+    handleUpload = (event: any) => {
+        this.setState({
+            ...this.state,
+            image: event.target.files[0]
+        })
+    }
+
+    async postImage(): Promise<void> {
+        let formData = new FormData();
+
+        formData.append('mock', 'hello!');
+        formData.append('image', this.state.image);
+
+        fetch(this.UPLOAD_ENDPOINT, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => console.log(response))
+        .catch(error => {})
+    }
+
     render() { 
         return ( 
                 <MainLayout isAlternative>
@@ -142,13 +161,20 @@ class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps
                     <div className="row justify-content-center">
                         <div className="col-10">
                         <Form validated={this.state.validated} style={{border: 'none', color: 'white'}} onSubmit={this.submitForm}>
-                            <Form.Group>
-                                <Form.Label>Course title</Form.Label>
-                                <Form.Control required minLength={10} maxLength={100} size='lg' id="title" value={this.state.title} type='text'
-                                onChange={this.handleChanges} placeholder="Course title" />
-                                <Form.Control.Feedback>Very well.</Form.Control.Feedback>
-                            </Form.Group>
-                            
+                            <Row>
+                                <Form.Group as={Col}>
+                                    <Form.Label>Course title</Form.Label>
+                                    <Form.Control required minLength={10} maxLength={100} size='lg' id="title" value={this.state.title} type='text'
+                                    onChange={this.handleChanges} placeholder="Course title" />
+                                </Form.Group>
+
+                                <Form.Group as={Col}>
+                                    <Form.Label>Course image</Form.Label>
+                                    <Form.Control required size='lg' id="title" type='file' accept='.jpg, .jpeg, .png'
+                                    onChange={this.handleUpload} />
+                                </Form.Group>
+                            </Row>
+
                             <Row>
                                 <Form.Group as={Col}>
                                     <Form.Label >First day</Form.Label>
