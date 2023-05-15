@@ -160,7 +160,6 @@ app.get(`${API_URL}${COURSES_URL}/personal/count`, (req: Request, res: Response)
                 }
             })
                 }   
-                console.log(bindedCoursesData)
             })
         }
     })
@@ -185,7 +184,7 @@ app.delete(`${API_URL}${COURSES_URL}/:id/delete`, (req: Request, res: Response) 
                     }
                 })
             } else {
-                res.status(500).send('Such course does not exist or you are not owner of this course.')
+                res.status(404).send('Such course does not exist or you are not owner of this course.')
             }
         }
     })
@@ -224,7 +223,7 @@ app.post(`${API_URL}${COURSES_URL}/:id/enroll`, (req: Request, res: Response) =>
                     res.status(500).send('SQL Error: '+ error1.stack)
                 } else {
                     if (result1.length > 0) {
-                        res.status(500).send('You already enrolled to this course.')
+                        res.status(409).send('You already enrolled to this course.')
                     } else {
                         connection.query('INSERT INTO Enrolled(user_id, course_id) VALUES(?, ?)', [result[0].id, course_id], (error2, result2) => {
                             if (error2) {
@@ -260,30 +259,35 @@ app.post(`${API_URL}${COURSES_URL}/register`, upload.single('image'), (req: Requ
             if (error) {
                 res.status(500).send('SQL Error: ' + error.stack);
             } else {
-                if (result.length > 0) {
-                    const owner_id = result[0].id;
-
-                    connection.query('INSERT INTO Courses(owner_id, title, language, dateStart, dateFinish, hoursStart, hoursFinish, hoursTimes, level, location, trainer, imagePath) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                    [owner_id, title, mapLanguage(language), dateStart, dateFinish,
-                        hoursStart, hoursFinish, hoursTimes, level.toUpperCase(), location, trainer, req.file?.path], 
-                        (error: mysql.MysqlError | null, result: mysql.OkPacket) => {
-                            if (error) {
-                                res.status(500).send('SQL Error: ' + error.stack)
-                            } else {
-                                if (result.affectedRows != 0) {
-                                    res.send('Added course successfully.')
-                                } else {
-                                    res.status(500).send('Could not add given course.')
-                                }
-                            }
-                        });
+                if (result[0].role !== 'CREATOR') {
+                    res.status(403).send('You do not have permission to add any courses.')
                 } else {
-                    res.status(500).send('No such user in the database.');
+                    if (result.length > 0) {
+                        const owner_id = result[0].id;
+
+                        connection.query('INSERT INTO Courses(owner_id, title, language, dateStart, dateFinish, hoursStart, hoursFinish, hoursTimes, level, location, trainer, imagePath) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                        [owner_id, title, mapLanguage(language), dateStart, dateFinish,
+                            hoursStart, hoursFinish, hoursTimes, level.toUpperCase(), location, trainer, req.file?.path], 
+                            (error: mysql.MysqlError | null, result: mysql.OkPacket) => {
+                                if (error) {
+                                    res.status(500).send('SQL Error: ' + error.stack)
+                                } else {
+                                    if (result.affectedRows != 0) {
+                                        res.send('Added course successfully.')
+                                    } else {
+                                        res.status(500).send('Could not add given course.')
+                                    }
+                                }
+                            });
+                    } else {
+                        res.status(404).send('No such user in the database.');
+                    }
                 }
+
             }
         })
     } else {
-        res.status(500).send('Incorrect value format.')
+        res.status(400).send('Incorrect value format.')
     }
 })
 
@@ -299,14 +303,14 @@ app.post(`${API_URL}/register`, (req: Request, res: Response) => {
     && checkStringMinMax(surname, 2, 50) 
     && checkStringMinMax(email, 5, 255)) {
         if (password !== confirmedPassword) {
-            res.status(500).send('Passwords do not match.')
+            res.status(422).send('Passwords do not match.')
         } else {
             bcrypt.genSalt(10, (errorSalt: Error | undefined, salt: string) => {
                 if (!errorSalt) {
                 bcrypt.hash(password, salt, (errorHash: Error | undefined, hashedPassword: string) => {
                     connection.query('SELECT * FROM Users WHERE username = ?', [username], ((error, results) => {
                         if (!error && results.length > 0) {
-                            res.status(303).send(`User ${username} already exists.`)
+                            res.status(409).send(`User ${username} already exists.`)
                         } else {
                             connection.query('INSERT INTO Users(username, password, name, surname, email, role) VALUES (?, ?, ?, ?, ?, ?)', 
                             [username, hashedPassword, name, surname, email, isCreator ? 'CREATOR' : 'REGULAR'], (error, result) => {
@@ -324,7 +328,7 @@ app.post(`${API_URL}/register`, (req: Request, res: Response) => {
             })
         }
     } else {
-        res.status(500).send('Incorrect value format.')
+        res.status(400).send('Incorrect value format.')
     }
 })
 
@@ -348,14 +352,14 @@ app.post(`${API_URL}/login`, (req: Request, res: Response) => {
                             message: 'Login successful.'
                         });
                     } else {
-                        res.status(500).json({
+                        res.status(401).json({
                             isAuthenticated: false,
                             message: 'Incorrect password.'
                         })
                     }
                 })
             } else {
-                res.status(500).json({
+                res.status(404).json({
                     isAuthenticated: false,
                     message: 'No such user in the database.'
                 })
