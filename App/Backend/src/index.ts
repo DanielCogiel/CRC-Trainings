@@ -6,6 +6,7 @@ import cors from 'cors';
 import bcrypt from 'bcrypt'
 import multer from 'multer';
 import fs from 'fs'
+import { checkCorrectLanguage, checkCorrectLevel, checkEmptyFields, checkStringMinMax } from './utility/validators';
 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -235,59 +236,79 @@ app.post(`${API_URL}${COURSES_URL}/register`, upload.single('image'), (req: Requ
     const hoursFinish = JSON.parse(hours).finish;
     const hoursTimes = JSON.parse(hours).times;
 
-    connection.query('SELECT * FROM Users WHERE username = ?', [username], (error, result) => {
-        if (error) {
-            res.status(500).send('SQL Error: ' + error.stack);
-        } else {
-            if (result.length > 0) {
-                const owner_id = result[0].id;
-
-                connection.query('INSERT INTO Courses(owner_id, title, language, dateStart, dateFinish, hoursStart, hoursFinish, hoursTimes, level, location, trainer, imagePath) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                [owner_id, title, mapLanguage(language), dateStart, dateFinish,
-                     hoursStart, hoursFinish, hoursTimes, level.toUpperCase(), location, trainer, req.file?.path], 
-                     (error: mysql.MysqlError | null, result: mysql.OkPacket) => {
-                        if (error) {
-                            res.status(500).send('SQL Error: ' + error.stack)
-                        } else {
-                            if (result.affectedRows != 0) {
-                                res.send('Added course successfully.')
-                            } else {
-                                res.status(500).send('Could not add given course.')
-                            }
-                        }
-                     });
+    if (checkEmptyFields(req.body) && checkEmptyFields(JSON.parse(date)) && checkEmptyFields(JSON.parse(hours)) 
+    && checkStringMinMax(title, 10, 100) && checkStringMinMax(trainer, 3, 100) && checkCorrectLevel(level) 
+    && checkCorrectLanguage(language)) {
+        connection.query('SELECT * FROM Users WHERE username = ?', [username], (error, result) => {
+            if (error) {
+                res.status(500).send('SQL Error: ' + error.stack);
             } else {
-                res.status(500).send('No such user in the database.');
+                if (result.length > 0) {
+                    const owner_id = result[0].id;
+
+                    connection.query('INSERT INTO Courses(owner_id, title, language, dateStart, dateFinish, hoursStart, hoursFinish, hoursTimes, level, location, trainer, imagePath) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    [owner_id, title, mapLanguage(language), dateStart, dateFinish,
+                        hoursStart, hoursFinish, hoursTimes, level.toUpperCase(), location, trainer, req.file?.path], 
+                        (error: mysql.MysqlError | null, result: mysql.OkPacket) => {
+                            if (error) {
+                                res.status(500).send('SQL Error: ' + error.stack)
+                            } else {
+                                if (result.affectedRows != 0) {
+                                    res.send('Added course successfully.')
+                                } else {
+                                    res.status(500).send('Could not add given course.')
+                                }
+                            }
+                        });
+                } else {
+                    res.status(500).send('No such user in the database.');
+                }
             }
-        }
-    })
+        })
+    } else {
+        res.status(500).send('Incorrect value format.')
+    }
 })
 
 //registers user
 app.post(`${API_URL}/register`, (req: Request, res: Response) => {
-    const {username, password, name, surname, email, isCreator} = req.body;
+    const {username, password, confirmedPassword, name, surname, email, isCreator} = req.body;
 
-    bcrypt.genSalt(10, (errorSalt: Error | undefined, salt: string) => {
-        if (!errorSalt) {
-        bcrypt.hash(password, salt, (errorHash: Error | undefined, hashedPassword: string) => {
-            connection.query('SELECT * FROM Users WHERE username = ?', [username], ((error, results) => {
-                if (!error && results.length > 0) {
-                    res.status(303).send(`User ${username} already exists.`)
-                } else {
-                    connection.query('INSERT INTO Users(username, password, name, surname, email, role) VALUES (?, ?, ?, ?, ?, ?)', 
-                    [username, hashedPassword, name, surname, email, isCreator ? 'CREATOR' : 'REGULAR'], (error, result) => {
-                        if (error) {
-                            res.status(500).send('Error inserting user into database.');
+    if (checkEmptyFields(req.body) 
+    && checkStringMinMax(username, 5, 50)
+    && checkStringMinMax(password, 5, 60)
+    && checkStringMinMax(confirmedPassword, 5, 60)
+    && checkStringMinMax(name, 2, 50) 
+    && checkStringMinMax(surname, 2, 50) 
+    && checkStringMinMax(email, 5, 255)) {
+        if (password !== confirmedPassword) {
+            res.status(500).send('Passwords do not match.')
+        } else {
+            bcrypt.genSalt(10, (errorSalt: Error | undefined, salt: string) => {
+                if (!errorSalt) {
+                bcrypt.hash(password, salt, (errorHash: Error | undefined, hashedPassword: string) => {
+                    connection.query('SELECT * FROM Users WHERE username = ?', [username], ((error, results) => {
+                        if (!error && results.length > 0) {
+                            res.status(303).send(`User ${username} already exists.`)
                         } else {
-                            res.send('User added succesfully.')
+                            connection.query('INSERT INTO Users(username, password, name, surname, email, role) VALUES (?, ?, ?, ?, ?, ?)', 
+                            [username, hashedPassword, name, surname, email, isCreator ? 'CREATOR' : 'REGULAR'], (error, result) => {
+                                if (error) {
+                                    res.status(500).send('Error inserting user into database.');
+                                } else {
+                                    res.send('User added succesfully.')
+                                }
+                            })
                         }
-                    })
+                    }));
+                })} else {
+                    res.status(500).send('Internal server error.')
                 }
-            }));
-        })} else {
-            res.status(500).send('Internal server error.')
+            })
         }
-    })
+    } else {
+        res.status(500).send('Incorrect value format.')
+    }
 })
 
 //logs user in

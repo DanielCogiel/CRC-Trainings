@@ -97,7 +97,6 @@ class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps
         const form = event.currentTarget;
         if (form.checkValidity()) {
             this.postCourse();
-            // this.postImage();
         }
     }
 
@@ -137,20 +136,6 @@ class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps
             ...this.state,
             image: event.target.files[0]
         })
-    }
-
-    async postImage(): Promise<void> {
-        let formData = new FormData();
-
-        formData.append('mock', 'hello!');
-        formData.append('image', this.state.image);
-
-        fetch(this.UPLOAD_ENDPOINT, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => console.log(response))
-        .catch(error => {})
     }
 
     render() { 
@@ -235,7 +220,7 @@ class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps
                                 
                                 <Form.Group>
                                     <Form.Label >Trainer's name</Form.Label>
-                                    <Form.Control required max='50' size='lg' id="trainer" value={this.state.trainer}
+                                    <Form.Control required min='3' max='100' size='lg' id="trainer" value={this.state.trainer}
                                     onChange={this.handleChanges} type='text' placeholder="Trainer's name" />
                                     <Button variant='primary' style={{marginTop: '10px'}} size='lg' type='submit'>Register new course</Button>  
                                 </Form.Group>
