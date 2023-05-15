@@ -18,7 +18,8 @@ interface RegistrationPageState {
     password: string,
     confirmedPassword: string,
     redirectToLogin: boolean,
-    isCreator: boolean
+    isCreator: boolean,
+    validated: boolean
 }
  
 class RegistrationPage extends React.Component<RegistrationPageProps, RegistrationPageState> {
@@ -34,7 +35,8 @@ class RegistrationPage extends React.Component<RegistrationPageProps, Registrati
             password: '',
             confirmedPassword: '',
             redirectToLogin: false,
-            isCreator: false
+            isCreator: false,
+            validated: false
         };
     }
 
@@ -48,13 +50,18 @@ class RegistrationPage extends React.Component<RegistrationPageProps, Registrati
 
     handleSubmit = (event: any) => {
         event.preventDefault();
-        this.postUser();
+
+        const form = event.currentTarget
+        if (form.checkValidity()) {
+            this.postUser();
+        }
     }
 
     async postUser(): Promise<void> {
         const data: UserModel = {
             username: this.state.username,
             password: this.state.password,
+            confirmedPassword: this.state.confirmedPassword,
             name: this.state.firstName,
             surname: this.state.lastName,
             email: this.state.email,
@@ -83,20 +90,7 @@ class RegistrationPage extends React.Component<RegistrationPageProps, Registrati
                     redirectToLogin: true
                 })
             }
-        })
-        
-
-
-        // if (response.status === 200) {
-        //     console.log("fsuhaiudahsdiu")
-        //     response.json().then(() => {
-        //         this.setState({
-        //         ...this.state,
-        //         redirectToLogin: true
-        //         });
-        //     });
-        //     }
-        
+        })    
     }
 
     handleChange = (event: any) => {
@@ -127,12 +121,15 @@ class RegistrationPage extends React.Component<RegistrationPageProps, Registrati
                 <div className='container'>
                     <div className='row justify-content-center'>
                         <div className='col-8'>
-                            <Form className='login-form rounded p-3' onSubmit={this.handleSubmit}>
+                            <Form validated={this.state.validated} className='login-form rounded p-3' onSubmit={this.handleSubmit}>
                                
                                 <Form.Group>
                                     <Form.Label>Username (check if you want to be creator)</Form.Label>
                                     <InputGroup>
                                         <Form.Control
+                                        required
+                                        minLength={5}
+                                        maxLength={50}
                                         id='username'
                                         placeholder='Enter your username'
                                         type='text'
@@ -146,6 +143,9 @@ class RegistrationPage extends React.Component<RegistrationPageProps, Registrati
                                     <Form.Group as={Col}>
                                         <Form.Label>First name</Form.Label>
                                         <Form.Control
+                                        required
+                                        minLength={2}
+                                        maxLength={50}
                                         id='firstName'
                                         placeholder='Enter your first name'
                                         type='text'
@@ -155,6 +155,9 @@ class RegistrationPage extends React.Component<RegistrationPageProps, Registrati
                                     <Form.Group as={Col}>
                                         <Form.Label>Last name</Form.Label>
                                         <Form.Control
+                                        required
+                                        minLength={2}
+                                        maxLength={50}
                                         id='lastName'
                                         placeholder='Enter your last name'
                                         type='text'
@@ -165,6 +168,9 @@ class RegistrationPage extends React.Component<RegistrationPageProps, Registrati
                                 <Form.Group>
                                     <Form.Label>Email</Form.Label>
                                     <Form.Control 
+                                    required
+                                    minLength={5}
+                                    maxLength={255}
                                     id='email'
                                     placeholder='Enter your E-mail'
                                     type='email'
@@ -175,6 +181,9 @@ class RegistrationPage extends React.Component<RegistrationPageProps, Registrati
                                     <Form.Group as={Col}>
                                         <Form.Label>Password</Form.Label>
                                         <Form.Control 
+                                        required
+                                        minLength={5}
+                                        maxLength={60}
                                         id='password'
                                         placeholder='Enter your password'
                                         type='password'
@@ -184,6 +193,9 @@ class RegistrationPage extends React.Component<RegistrationPageProps, Registrati
                                     <Form.Group as={Col}>
                                         <Form.Label>Confirm password</Form.Label>
                                         <Form.Control
+                                        required
+                                        minLength={5}
+                                        maxLength={60}
                                         id='confirmedPassword'
                                         placeholder='Enter password again' 
                                         type='password'
