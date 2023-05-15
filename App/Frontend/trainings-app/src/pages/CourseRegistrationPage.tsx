@@ -4,6 +4,7 @@ import { Navigate } from 'react-router-dom';
 import { toast } from 'react-toastify'
 
 import MainLayout from '../layouts/MainLayout';
+import CreatorWrapper from '../layouts/CreatorWrapper';
 import CourseModel from '../interfaces/CourseModel';
 import { API_URLS } from '../config/api';
 import { Level, Language } from '../config/enums';
@@ -124,10 +125,12 @@ class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps
             });
             const message = await response.text();
             toast.info(message);
-            this.setState({
-                ...this.state,
-                redirect: true
-            })
+            if (response.status === 200) {
+                this.setState({
+                    ...this.state,
+                    redirect: true
+                })
+            }
         } catch (error: any) {}
     }
 
@@ -140,6 +143,7 @@ class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps
 
     render() { 
         return ( 
+            <CreatorWrapper>
                 <MainLayout isAlternative>
                 <h1 className="section-header">Register new course</h1>
                 <div className="container">
@@ -234,6 +238,7 @@ class CourseRegistrationPage extends React.Component<CourseRegistrationPageProps
                     </div>
                 </div>
                 </MainLayout>
+            </CreatorWrapper>
          );
     }
 }
