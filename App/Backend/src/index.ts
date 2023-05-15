@@ -130,7 +130,9 @@ app.get(`${API_URL}${COURSES_URL}/personal`, (req: Request, res: Response) => {
     })
 })
 
+//get personal courses count
 app.get(`${API_URL}${COURSES_URL}/personal/count`, (req: Request, res: Response) => {
+    let count = 0;
     connection.query('SELECT Users.id FROM Users WHERE Users.username = ?', [req.query.username], (error, id_row) => {
         if (error) {
             res.json({message: ('SQL Error: ' + error.stack)})
@@ -142,8 +144,23 @@ app.get(`${API_URL}${COURSES_URL}/personal/count`, (req: Request, res: Response)
                     res.json({message: ('SQL Error: ' + err.stack)})
                 }
                 else {
-                    res.json({count: bindedCoursesData.length})
+                    connection.query('SELECT Courses.id, Courses.level, Users.username, Courses.title, Courses.language, Courses.dateStart, Courses.dateFinish, Courses.hoursStart, Courses.hoursFinish, Courses.hoursTimes, Courses.location, Courses.trainer, Courses.imagePath FROM Courses JOIN Users ON Courses.owner_id = Users.id', [], 
+                (error1, result) => {
+                if (!error1) {
+                    result.map((course: any) => {
+                        const isEnrolled: boolean = !!bindedCoursesData.find((elem: any) => elem.course_id === course.id && elem.enroll_id === user_id)
+                        const isOwner: boolean = !!bindedCoursesData.find((elem: any) => elem.course_id === course.id && elem.owner_id === user_id)
+                        if (isEnrolled || isOwner) {
+                            count++;
+                        }
+                    })
+                    res.json({count: count});
+                } else {
+                    res.status(500).json({message: 'SQL error: ' + error1.stack});
+                }
+            })
                 }   
+                console.log(bindedCoursesData)
             })
         }
     })
