@@ -336,7 +336,7 @@ app.post(`${API_URL}/register`, (req: Request, res: Response) => {
 app.post(`${API_URL}/login`, (req: Request, res: Response) => {
     const {username, password} = req.body;
 
-    connection.query('SELECT * FROM Users WHERE username = ?', [username], (error, result) => {
+    connection.query('SELECT * FROM Users WHERE username = ? COLLATE utf8_bin', [username], (error, result) => {
         if (error) {
             res.status(500).json({
                 isAuthenticated: false,
