@@ -6,14 +6,15 @@ import cors from 'cors';
 import bcrypt from 'bcrypt'
 import multer from 'multer';
 import fs from 'fs'
+import 'dotenv/config'
 import { checkCorrectLanguage, checkCorrectLevel, checkEmptyFields, checkStringMinMax } from './utility/validators';
 
 const connection = mysql.createConnection({
-    host: 'localhost',
-    port: 3306,
-    user: 'mysqluser',
-    password: 'mysqluser',
-    database: 'TRAININGS_DB'
+    host: process.env.DB_HOST,
+    port: parseInt(process.env.DB_PORT || '3306'),
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
 })
 
 connection.connect(error => {
@@ -30,7 +31,7 @@ const upload = multer({
 
 const API_URL: string = '/api'
 const COURSES_URL: string = '/courses'
-const PORT: number = 4000;
+const PORT = process.env.SERVER_PORT;
 
 const app: Express = express();
 
