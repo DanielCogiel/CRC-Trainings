@@ -6,8 +6,12 @@ package-lock.json
 
 .vscode
 TRAININGS DATABASE.session.sql
-uploads
+/uploads
 .env
+
+# Ignore all files in dist folder (but not folder itself)
+dist/*
+!dist/.gitkeep
 
 # Coveralls
 .nyc_output
