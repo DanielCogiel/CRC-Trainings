@@ -1,4 +1,4 @@
-export const SERVER_URL = 'http://localhost:4000'
+export const SERVER_URL = 'https://crc-backend-tv3v.onrender.com'
 const API_URL = `${SERVER_URL}/api`;
 const REGISTER_URL = `${API_URL}/register`;
 const LOGIN_URL = `${API_URL}/login`
