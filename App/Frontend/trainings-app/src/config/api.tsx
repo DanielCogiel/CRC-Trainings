@@ -1,4 +1,4 @@
-export const SERVER_URL = 'https://crc-backend-tv3v.onrender.com'
+export const SERVER_URL = process.env.REACT_APP_API_URL
 const API_URL = `${SERVER_URL}/api`;
 const REGISTER_URL = `${API_URL}/register`;
 const LOGIN_URL = `${API_URL}/login`
