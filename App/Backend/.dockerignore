@@ -3,3 +3,4 @@ uploads
 *.session.sql
 dist/*
 !dist/
+.env
