@@ -43,6 +43,7 @@ app.use('/uploads', express.static('uploads'))
 app.get(`${API_URL}${COURSES_URL}/all`, (req: Request, res: Response) => {
     let data: CourseModel[] = [];
     connection.query('SELECT Users.id FROM Users WHERE Users.username = ?', [req.query.username], (error, id_row) => {
+        if (id_row.length > 0) {
         const user_id = id_row[0].id || null;
         connection.query('SELECT Courses.id AS course_id, Enrolled.user_id AS enroll_id, Courses.owner_id AS owner_id FROM Users JOIN Enrolled ON Users.id = Enrolled.user_id RIGHT JOIN Courses ON Enrolled.course_id = Courses.id WHERE Courses.owner_id = ? OR Enrolled.user_id = ?;',
         [user_id, user_id], (error, bindedCoursesData) => {
@@ -80,6 +81,9 @@ app.get(`${API_URL}${COURSES_URL}/all`, (req: Request, res: Response) => {
                 }
             })
         })
+    } else {
+        res.status(500).json({message: 'No user was found.'})
+    }
     })
 })
 
@@ -87,7 +91,8 @@ app.get(`${API_URL}${COURSES_URL}/all`, (req: Request, res: Response) => {
 app.get(`${API_URL}${COURSES_URL}/personal`, (req: Request, res: Response) => {
     let data: CourseModel[] = [];
     connection.query('SELECT Users.id FROM Users WHERE Users.username = ?', [req.query.username], (error, id_row) => {
-        const user_id = id_row[0].id || null;
+        if (id_row.length > 0) {
+        const user_id = id_row[0].id;
         connection.query('SELECT Courses.id AS course_id, Enrolled.user_id AS enroll_id, Courses.owner_id AS owner_id FROM Users JOIN Enrolled ON Users.id = Enrolled.user_id RIGHT JOIN Courses ON Enrolled.course_id = Courses.id WHERE Courses.owner_id = ? OR Enrolled.user_id = ?;',
         [user_id, user_id], (error, bindedCoursesData) => {
             connection.query('SELECT Courses.id, Courses.level, Users.username, Courses.title, Courses.language, Courses.dateStart, Courses.dateFinish, Courses.hoursStart, Courses.hoursFinish, Courses.hoursTimes, Courses.location, Courses.trainer, Courses.imagePath FROM Courses JOIN Users ON Courses.owner_id = Users.id', [], 
@@ -124,10 +129,14 @@ app.get(`${API_URL}${COURSES_URL}/personal`, (req: Request, res: Response) => {
                     })
                     res.json(data);
                 } else {
-                    res.status(500).json({message: 'SQL error: ' + error1.stack});
+                    res.status(500).json({message: 'No user was found.'});
                 }
             })
         })
+    } else {
+        res.status(500).json({message: 'SQL error: ' + error?.stack})
+    }
+
     })
 })
 
@@ -138,6 +147,7 @@ app.get(`${API_URL}${COURSES_URL}/personal/count`, (req: Request, res: Response)
         if (error) {
             res.json({message: ('SQL Error: ' + error.stack)})
         } else {
+            if (id_row.length > 0) {
             const user_id = id_row[0].id || null;
             connection.query('SELECT Courses.id AS course_id, Enrolled.user_id AS enroll_id, Courses.owner_id AS owner_id FROM Users JOIN Enrolled ON Users.id = Enrolled.user_id RIGHT JOIN Courses ON Enrolled.course_id = Courses.id WHERE Courses.owner_id = ? OR Enrolled.user_id = ?;',
             [user_id, user_id], (err, bindedCoursesData) => {
@@ -162,6 +172,10 @@ app.get(`${API_URL}${COURSES_URL}/personal/count`, (req: Request, res: Response)
             })
                 }   
             })
+        } else {
+            res.status(500).json({message: 'No user was found.'})
+        }
+
         }
     })
 })
